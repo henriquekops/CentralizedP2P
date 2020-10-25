@@ -18,7 +18,7 @@ Base = declarative_base()
 class ResourceTable(Base):
 
     """
-    Peer resource table
+    Database resource table
     """
 
     __tablename__ = "resources"

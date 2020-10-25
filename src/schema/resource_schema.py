@@ -10,7 +10,7 @@ __date__ = "24/10/2020"
 
 class GetSchema(Schema):
     """
-    Schema validation for resource 'GET' route
+    Schema validation for server's 'GET' route (/resource)
     """
 
     resource_name = fields.String()
@@ -18,7 +18,7 @@ class GetSchema(Schema):
 
 class PostSchema(Schema):
     """
-    Schema validation for resource 'POST' route
+    Schema validation for server's 'POST' route (/resource)
     """
 
     peer_id = fields.UUID()

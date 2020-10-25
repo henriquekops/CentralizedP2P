@@ -6,8 +6,8 @@ import flask
 import flask_restful
 
 # project dependencies
-from controllers.resource_controller import ResourceController
-from orm.resource_access import ResourceAccess
+from controllers.server_controller import ResourceController
+from controllers.database_controller import DatabaseResourceTableController
 
 __authors__ = ["Gabriel Castro", "Gustavo Possebon", "Henrique Kops"]
 __date__ = "24/10/2020"
@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     api.add_resource(ResourceController, "/resource")
 
-    access = ResourceAccess()
+    access = DatabaseResourceTableController()
     access.create_database()
 
     app.run()

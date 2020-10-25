@@ -5,10 +5,9 @@
 from flask import request
 from flask_restful import Resource
 from marshmallow import ValidationError
-from pprint import pprint
 
 # project dependencies
-from orm.resource_access import ResourceAccess
+from controllers.database_controller import DatabaseResourceTableController
 from schema.resource_schema import (
     GetSchema,
     PostSchema
@@ -26,7 +25,7 @@ class ResourceController(Resource):
     post_schema = PostSchema()
     get_schema = GetSchema()
 
-    db_access = ResourceAccess()
+    db_access = DatabaseResourceTableController()
 
     @classmethod
     def get(cls):
@@ -36,15 +35,19 @@ class ResourceController(Resource):
         """
 
         body = request.get_json()
-        pprint(body)
+
         if not body:
             return "No body", 400
+
         try:
             body_data = cls.get_schema.load(body)
-            peer_ips = cls.db_access.get_peer_ip(
+
+            peer_ips = cls.db_access.get_peer_ips(
                 resource_name=body_data.get("resource_name")
             )
+
             return peer_ips, 200
+
         except ValidationError as error:
             return error.messages, 422
 
@@ -56,17 +59,21 @@ class ResourceController(Resource):
         """
 
         body = request.get_json()
-        pprint(body)
+
         if not body:
             return "No body", 400
+
         try:
             body_data = cls.post_schema.load(body)
+
             cls.db_access.register_peer(
                 peer_ip=str(body_data.get("peer_ip")),
                 peer_id=str(body_data.get("peer_id")),
                 resource_name=body_data.get("resource_name"),
                 resource_hash=body_data.get("resource_hash")
             )
+
             return cls.post_schema.dump(body_data), 200
+
         except ValidationError as error:
             return error.messages, 422
