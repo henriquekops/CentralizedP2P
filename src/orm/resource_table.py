@@ -22,8 +22,9 @@ class ResourceTable(Base):
     """
 
     __tablename__ = "resources"
+    sqlite_autoincrement = True
 
-    id = Column(Integer, primary_key=True, autoincrement=True, default=1)  # auto incremental PK
+    id = Column(Integer, primary_key=True)  # auto incremental PK
     peerId = Column(String(36), nullable=False)  # peer ID
     peerIp = Column(String(16), nullable=False)  # peer IP
     resourceName = Column(String(100), nullable=False)  # resource's name

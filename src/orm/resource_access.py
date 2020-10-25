@@ -24,32 +24,39 @@ class ResourceAccess:
     def create_database(self):
         Base.metadata.create_all(self.engine)
 
-    def insert(self, peer_id, peer_ip, resource_name, resource_hash):
+    def register_peer(self, peer_id, peer_ip, resource_name, resource_hash):
         session = self.session()
         try:
-            new_resource = ResourceTable(peer_id, peer_ip, resource_name, resource_hash)
+            new_resource = ResourceTable()
+
+            new_resource.peerId = peer_id
+            new_resource.peerIp = peer_ip
+            new_resource.resourceName = resource_name
+            new_resource.resourceHash = resource_hash
+
             session.add(new_resource)
             session.commit()
         finally:
             session.close()
 
-    def select(self, resource_name):
+    def get_peer_ip(self, resource_name):
         session = self.session()
         try:
             return session\
                 .query(ResourceTable.peerIp)\
                 .filter(ResourceTable.resourceName == resource_name)\
-                .groupBy(ResourceTable.peerId)\
+                .group_by(ResourceTable.peerId)\
                 .all()
         finally:
             session.close()
 
-    def delete(self, peer_ip):
+    def drop_peer(self, peer_id):
         session = self.session()
         try:
             session\
                 .query(ResourceTable)\
-                .filter(ResourceTable.peerIp == peer_ip)\
+                .filter(ResourceTable.peerId == peer_id)\
                 .delete()
+            session.commit()
         finally:
             session.close()
