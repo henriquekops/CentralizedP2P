@@ -29,8 +29,7 @@ class DatabaseResourceTableController:
         Create all sqlite3 databases registered at 'Base' object through declared 'engine'
         """
 
-        if not self.engine.dialect.has_table(self.engine, ResourceTable):
-            Base.metadata.create_all(self.engine)
+        Base.metadata.create_all(self.engine)
 
     def register_peer(self, peer_id: str, peer_ip: str, resource_name: str, resource_hash: str) -> None:
         """

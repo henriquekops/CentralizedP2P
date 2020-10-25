@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# built-in dependencies
+from pprint import pprint
+
 # project dependencies
 from controllers.peer_controller import PeerController
 
@@ -15,7 +18,7 @@ if __name__ == "__main__":
     peer = PeerController(peer_ip, server_ip)
 
     resource = input("resource to register: ")
-    peer.register_resource(resource)
+    pprint(peer.register_resource(resource).json())
 
     resource = input("resource to retrieve: ")
-    peer.get_resource(resource)
+    pprint(peer.get_resource(resource).json())

@@ -1,5 +1,5 @@
 # CentralizedP2P
-> Python version: 3.6.5
+> Python version: 3.8.6
 
 A simple program to run a centralized peer to peer architecture using 
 sockets and REST.
