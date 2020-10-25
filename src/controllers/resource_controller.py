@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from pprint import pprint
-
 # external dependencies
 from flask import request
 from flask_restful import Resource
 from marshmallow import ValidationError
+from pprint import pprint
 
 # project dependencies
 from orm.resource_access import ResourceAccess
@@ -37,6 +36,7 @@ class ResourceController(Resource):
         """
 
         body = request.get_json()
+        pprint(body)
         if not body:
             return "No body", 400
         try:
@@ -56,6 +56,7 @@ class ResourceController(Resource):
         """
 
         body = request.get_json()
+        pprint(body)
         if not body:
             return "No body", 400
         try:

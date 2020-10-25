@@ -34,7 +34,7 @@ _**@TODO**: Peer_
 To communicate with the centralized server all peers utilize REST calls 
 with the same format shown below: 
 
-#### Route: <base_url>/resources
+#### Route: <base_url>/resource
 GET: Retrieve peer ips that contains such resource
 ```
 {
