@@ -32,7 +32,7 @@ class ResourceController(Resource):
     @classmethod
     def get(cls):
         """
-        Retrieve peer ips that contains resource
+        Retrieve peer ips that contains such resource
         :return: List of peer ips
         """
 
