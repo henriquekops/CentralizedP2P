@@ -9,6 +9,7 @@ from uuid import uuid4
 
 # external dependencies
 import requests
+from requests import Response
 
 __authors__ = ["Gabriel Castro", "Gustavo Possebon", "Henrique Kops"]
 __date__ = "24/10/2020"
@@ -19,13 +20,13 @@ class PeerController:
     Controller for peer communication
     """
 
-    def __init__(self, peer_ip, server_ip):
+    def __init__(self, peer_ip: str, server_ip: str):
         self.server_ip = server_ip
         self.peer_ip = peer_ip
         self.peer_id = str(uuid4())
 
     @staticmethod
-    def __generate_hash(resource):
+    def __generate_hash(resource: str) -> str:
         """
         Generates a MD5 hash over resource's content
 
@@ -41,7 +42,7 @@ class PeerController:
 
         return hash_md5.hexdigest()
 
-    def register_resource(self, resource):
+    def register_resource(self, resource: str) -> Response:
         """
         Call server to register resource and assign to this peer
 
@@ -64,7 +65,7 @@ class PeerController:
             headers=header
         )
 
-    def get_resource(self, resource):
+    def get_resource(self, resource: str) -> Response:
         """
         Call server to search peer ips that contains this resource
 

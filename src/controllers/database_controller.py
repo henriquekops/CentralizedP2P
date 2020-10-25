@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# built-in dependencies
+from typing import List
+
 # external dependencies
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
@@ -29,7 +32,7 @@ class DatabaseResourceTableController:
         if not self.engine.dialect.has_table(self.engine, ResourceTable):
             Base.metadata.create_all(self.engine)
 
-    def register_peer(self, peer_id, peer_ip, resource_name, resource_hash):
+    def register_peer(self, peer_id: str, peer_ip: str, resource_name: str, resource_hash: str) -> None:
         """
         Register peer-resource relationship at database
 
@@ -55,7 +58,7 @@ class DatabaseResourceTableController:
         finally:
             session.close()
 
-    def get_peer_ips(self, resource_name):
+    def get_peer_ips(self, resource_name: str) -> List:
         """
         Get every peer's ip that has registered same resource name
 
@@ -75,7 +78,7 @@ class DatabaseResourceTableController:
         finally:
             session.close()
 
-    def drop_peer(self, peer_id):
+    def drop_peer(self, peer_id: str) -> None:
         """
         Delete every peer's record through its id
 

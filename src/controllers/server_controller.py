@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# built-in dependencies
+from typing import Tuple
+
 # external dependencies
 from flask import request
 from flask_restful import Resource
@@ -28,7 +31,7 @@ class ResourceController(Resource):
     db_access = DatabaseResourceTableController()
 
     @classmethod
-    def get(cls):
+    def get(cls) -> Tuple:
         """
         Retrieve peer ips that contains such resource
         :return: List of peer ips
@@ -52,7 +55,7 @@ class ResourceController(Resource):
             return error.messages, 422
 
     @classmethod
-    def post(cls):
+    def post(cls) -> Tuple:
         """
         Assign a new resource to a peer
         :return: Request body
