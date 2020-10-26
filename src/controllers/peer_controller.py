@@ -26,35 +26,35 @@ class PeerController:
         self.peer_id = str(uuid4())
 
     @staticmethod
-    def __generate_hash(resource: str) -> str:
+    def __generate_hash(resource_name: str) -> str:
         """
         Generates a MD5 hash over resource's content
 
-        :param resource: Resource provided by this peer
+        :param resource_name: Resource provided by this peer
         :return: MD5 hash over resource's content
         """
 
         hash_md5 = md5()
 
-        with open(resource, "rb") as r:
+        with open(resource_name, "rb") as r:
             for chunk in iter(lambda: r.read(4096), b""):
                 hash_md5.update(chunk)
 
         return hash_md5.hexdigest()
 
-    def register_resource(self, resource: str) -> Response:
+    def register_resource(self, resource_name: str) -> Response:
         """
         Call server to register resource and assign to this peer
 
-        :param resource: Resource provided by this peer
-        :return: Server's response
+        :param resource_name: Resource provided by this peer
+        :return: resource_name's response
         """
 
         body = {
             "peer_id": self.peer_id,
             "peer_ip": self.peer_ip,
-            "resource_name": os.path.basename(resource),
-            "resource_hash": self.__generate_hash(resource)
+            "resource_name": os.path.basename(resource_name),
+            "resource_hash": self.__generate_hash(resource_name)
         }
         header = {
             "content-type": "application/json; charset=utf-8"
@@ -65,16 +65,16 @@ class PeerController:
             headers=header
         )
 
-    def get_resource(self, resource: str) -> Response:
+    def get_resource(self, resource_name: str) -> Response:
         """
         Call server to search peer ips that contains this resource
 
-        :param resource: Resource provided by this peer
+        :param resource_name: Resource provided by this peer
         :return: Server's response
         """
 
         body = {
-            "resource_name": resource
+            "resource_name": resource_name
         }
         header = {
             "content-type": "application/json; charset=utf-8"
