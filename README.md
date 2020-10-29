@@ -27,7 +27,13 @@ for this P2P architecture. To achieve this, run:
 $ python src/server.py
 ```
 
-_**@TODO**: Peer_
+Then you can start peers to communicate with the centralized server and
+between each other. To achieve this, run:
+```
+# at CentralizedP2P/
+
+$ python src/peer.py
+```
 
 ## REST routing
 
@@ -55,4 +61,4 @@ POST: Assign a new resource to a peer
 ## Project architecture
 The base architecture is shown below:
 
-![image](https://drive.google.com/uc?export=view&id=16Ao56woCVmcw2jlRzOQEhn3UDGAapZXD)
+![image](https://drive.google.com/uc?export=view&id=1GJu5k_P0wcMWaaq7wivpEERKf7CE-OAk)
