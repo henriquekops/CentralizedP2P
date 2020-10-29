@@ -23,5 +23,6 @@ class PostSchema(Schema):
 
     peer_id = fields.UUID()
     peer_ip = fields.IPv4()
+    peer_port = fields.Int()
     resource_name = fields.String()
     resource_hash = fields.String()

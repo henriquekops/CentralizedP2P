@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # built-in dependencies
+import json
 from typing import Tuple
 
 # external dependencies
@@ -33,8 +34,8 @@ class ResourceController(Resource):
     @classmethod
     def get(cls) -> Tuple:
         """
-        Retrieve peer ips that contains such resource
-        :return: List of peer ips
+        Retrieve every peer's info that contains such resource
+        :return: List of peer's info
         """
 
         body = request.get_json()
@@ -45,11 +46,15 @@ class ResourceController(Resource):
         try:
             body_data = cls.get_schema.load(body)
 
-            peer_ips = cls.db_access.get_peer_ips(
+            peer_matrix = cls.db_access.get_available_peers(
                 resource_name=body_data.get("resource_name")
             )
 
-            return peer_ips, 200
+            # map returned db matrix into list of dicts as: [{"peer_ip": "...", "peer_port": "..."}]
+            fields = ["peer_ip", "peer_port"]
+            peer_list = list(map(lambda x: {fields[i]: x[i] for i in range(len(x))}, peer_matrix))
+
+            return json.dumps(peer_list), 200
 
         except ValidationError as error:
             return error.messages, 422
@@ -72,11 +77,12 @@ class ResourceController(Resource):
             cls.db_access.register_peer(
                 peer_ip=str(body_data.get("peer_ip")),
                 peer_id=str(body_data.get("peer_id")),
+                peer_port=int(body_data.get("peer_port")),
                 resource_name=body_data.get("resource_name"),
                 resource_hash=body_data.get("resource_hash")
             )
 
-            return cls.post_schema.dump(body_data), 200
+            return json.dumps(body), 200
 
         except ValidationError as error:
             return error.messages, 422

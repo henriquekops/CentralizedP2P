@@ -31,12 +31,13 @@ class DatabaseResourceTableController:
 
         Base.metadata.create_all(self.engine)
 
-    def register_peer(self, peer_id: str, peer_ip: str, resource_name: str, resource_hash: str) -> None:
+    def register_peer(self, peer_id: str, peer_ip: str, peer_port: int, resource_name: str, resource_hash: str) -> None:
         """
         Register peer-resource relationship at database
 
         :param peer_id: Peer's id
         :param peer_ip: Peer's ip
+        :param peer_port: Peer's listen port
         :param resource_name: Resource's name
         :param resource_hash: Resource's MD5
         """
@@ -48,6 +49,7 @@ class DatabaseResourceTableController:
 
             new_resource.peerId = peer_id
             new_resource.peerIp = peer_ip
+            new_resource.peerPort = peer_port
             new_resource.resourceName = resource_name
             new_resource.resourceHash = resource_hash
 
@@ -57,9 +59,9 @@ class DatabaseResourceTableController:
         finally:
             session.close()
 
-    def get_peer_ips(self, resource_name: str) -> List:
+    def get_available_peers(self, resource_name: str) -> List:
         """
-        Get every peer's ip that has registered same resource name
+        Get every peer's ip and port that has registered same resource name
 
         :param resource_name: Name of the resource to be searched at database
         :return: List of peer's ips
@@ -69,7 +71,7 @@ class DatabaseResourceTableController:
 
         try:
             return session\
-                .query(ResourceTable.peerIp)\
+                .query(ResourceTable.peerIp, ResourceTable.peerPort)\
                 .filter(ResourceTable.resourceName == resource_name)\
                 .group_by(ResourceTable.peerId)\
                 .all()
