@@ -55,7 +55,7 @@ POST: Assign a new resource to a peer
 	"peer_ip": "127.0.0.1",
 	"peer_port": 3000,
 	"resource_name": "test.txt",
-	"resource_path": "./tests/"
+	"resource_path": "./tests/",
 	"resource_hash": "12345"
 }
 ```
