@@ -53,7 +53,9 @@ POST: Assign a new resource to a peer
 {
 	"peer_id": "42bb7fb8-8f8d-4c1c-b4df-d97c2e78eb7c",
 	"peer_ip": "127.0.0.1",
-	"resource_name": "test.csv",
+	"peer_port": 3000,
+	"resource_name": "test.txt",
+	"resource_path": "./tests/"
 	"resource_hash": "12345"
 }
 ```
