@@ -61,4 +61,4 @@ POST: Assign a new resource to a peer
 ## Project architecture
 The base architecture is shown below:
 
-![image](https://drive.google.com/uc?export=view&id=1GJu5k_P0wcMWaaq7wivpEERKf7CE-OAk)
+![image](https://drive.google.com/uc?export=view&id=16nh2_rswtXP-l3v3l1vy2A7Hr-1iQ-6Q)
