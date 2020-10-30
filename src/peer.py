@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     commands = {
         "-u": peer.upload,
-        "-d": peer.download
+        "-d": peer.download,
     }
 
     peer.download_thread.start()
@@ -41,7 +41,7 @@ if __name__ == "__main__":
             print("bye...")
             break
 
-        elif len(args) != 2:
+        elif len(args) != 2 or args[0] not in commands.keys():
             print("input [-d, -u] <resource_name>")
 
         else:

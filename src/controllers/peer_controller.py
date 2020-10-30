@@ -66,10 +66,11 @@ class PeerController:
 
         return hash_md5.hexdigest()
 
-    def __upload(self, resource_name: str) -> Response:
+    def __upload(self, resource_path: str, resource_name: str) -> Response:
         """
         Call server to register resource and assign to this peer
 
+        :param resource_path: Provided resource's path
         :param resource_name: Resource provided by this peer
         :return: Central server's response
         """
@@ -78,8 +79,8 @@ class PeerController:
             "peer_id": self.peer_id,
             "peer_ip": self.peer_ip,
             "peer_port": self.thread_port,
-            "resource_path": os.path.dirname(resource_name),
-            "resource_name": os.path.basename(resource_name),
+            "resource_path": resource_path,
+            "resource_name": resource_name,
             "resource_hash": self.__generate_hash(resource_name)
         }
         header = {
@@ -111,15 +112,20 @@ class PeerController:
             headers=header
         )
 
-    def upload(self, resource_name: str) -> str:
+    def upload(self, resource: str) -> str:
         """
         Uploads a local resource
 
-        :param resource_name: Local resource name to be published
+        :param resource: Local resource name to be published
         :return: Central server's response
         """
 
-        return self.__upload(resource_name).json()
+        try:
+            resource_path = os.path.dirname(resource)
+            resource_name = os.path.basename(resource)
+            return f"uploaded: {self.__upload(resource_path, resource_name).json()}"
+        except FileNotFoundError:
+            return f"resource '{resource}' not found!"
 
     def download(self, resource_name) -> str:
         """

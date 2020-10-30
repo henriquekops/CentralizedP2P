@@ -40,6 +40,7 @@ class DatabaseResourceTableController:
         :param peer_ip: Peer's ip
         :param peer_port: Peer's listen port
         :param resource_name: Resource's name
+        :param resource_path: Resource's path
         :param resource_hash: Resource's MD5
         """
 
