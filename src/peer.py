@@ -31,6 +31,7 @@ if __name__ == "__main__":
         "-d": peer.download,
     }
 
+    peer.heartbeat_thread.start()
     peer.download_thread.start()
 
     while True:
@@ -50,5 +51,8 @@ if __name__ == "__main__":
         else:
             print(commands.get(args[0])(args[1]))
 
+    peer.heartbeat_thread.stop()
     peer.download_thread.stop()
+
+    peer.heartbeat_thread.join()
     peer.download_thread.join()

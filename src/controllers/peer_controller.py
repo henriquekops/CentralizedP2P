@@ -8,11 +8,11 @@ import json
 import os
 import socket
 from socket import timeout
+import time
 from threading import (
     Thread,
     Event
 )
-
 from uuid import uuid4
 
 # external dependencies
@@ -38,6 +38,8 @@ class PeerController:
         self.socket.bind((peer_ip, int(peer_port)))
 
         self.download_thread = PeerDownloadThread(peer_ip, thread_port)
+        self.heartbeat_thread = PeerHeartBeat(peer_ip, server_ip)
+
         self.__create_downloads_dir()
 
     @staticmethod
@@ -191,7 +193,48 @@ class PeerDownloadThread(Thread):
 
     def stop(self) -> None:
         """
-        Kills the running
+        Kills the running thread
         """
 
         self._stop_event.set()
+
+
+class PeerHeartBeat(Thread):
+    """
+    Peer thread for heart beat
+    """
+
+    def __init__(self, peer_ip, server_ip, *args, **kwargs):
+        super(PeerHeartBeat).__init__(*args, **kwargs)
+
+        self.peer_ip = peer_ip
+        self.server_ip = server_ip
+        self.__stop_event = Event()
+
+    def run(self) -> None:
+        """
+        Overrides the default thread's behaviour to
+        consume a heartbeat route at central server
+        """
+
+        body = {
+            "peer_ip": self.peer_ip
+        }
+        headers = {
+            "Content-Type: application/json"
+        }
+
+        while not self.__stop_event.is_set():
+            requests.get(
+                f"{self.server_ip}:5000/heartbeat",
+                data=json.dumps(body),
+                headers=headers
+            )
+            time.sleep(5)
+
+    def stop(self) -> None:
+        """
+        Kills the running thread
+        """
+
+        self.__stop_event.set()

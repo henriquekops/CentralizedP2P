@@ -12,9 +12,10 @@ from marshmallow import ValidationError
 
 # project dependencies
 from controllers.database_controller import DatabaseResourceTableController
+from schema.heartbeat_schema import GetHeartbeatSchema
 from schema.resource_schema import (
-    GetSchema,
-    PostSchema
+    GetResourceSchema,
+    PostResourceSchema
 )
 
 __authors__ = ["Gabriel Castro", "Gustavo Possebon", "Henrique Kops"]
@@ -26,8 +27,8 @@ class ResourceController(Resource):
     Controller for '/resource' route
     """
 
-    post_schema = PostSchema()
-    get_schema = GetSchema()
+    post_schema = PostResourceSchema()
+    get_schema = GetResourceSchema()
 
     db_access = DatabaseResourceTableController()
 
@@ -86,6 +87,33 @@ class ResourceController(Resource):
             )
 
             return json.dumps(body), 200
+
+        except ValidationError as error:
+            return error.messages, 422
+
+
+class HeartBeatController(Resource):
+    """
+    Controller for '/heartbeat' route
+    """
+
+    get_schema = GetHeartbeatSchema()
+
+    @classmethod
+    def get(cls) -> Tuple:
+
+        body = request.get_json()
+
+        if not body:
+            return "No body", 400
+
+        try:
+
+            body_data = cls.get_schema.load(body)
+
+            # TODO: add body to some list
+
+            return "OK", 200
 
         except ValidationError as error:
             return error.messages, 422
