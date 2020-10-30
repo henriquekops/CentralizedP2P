@@ -27,6 +27,7 @@ class ResourceTable(Base):
     id = Column(Integer, primary_key=True)  # auto incremental PK
     peerId = Column(String(36), nullable=False, unique=True)  # peer ID
     peerIp = Column(String(16), nullable=False)  # peer IP
-    peerPort = Column(Integer, nullable=False) # peer download port
+    peerPort = Column(Integer, nullable=False)  # peer download port
     resourceName = Column(String(100), nullable=False)  # resource's name
+    resourcePath = Column(String(100), nullable=False)  # resource's path at peerIp:peerPort
     resourceHash = Column(String(50), nullable=False)  # resource's hash

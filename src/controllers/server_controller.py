@@ -31,6 +31,8 @@ class ResourceController(Resource):
 
     db_access = DatabaseResourceTableController()
 
+    db_get_fields = ["peer_ip", "peer_port", "resource_path", "resource_name"]
+
     @classmethod
     def get(cls) -> Tuple:
         """
@@ -50,9 +52,9 @@ class ResourceController(Resource):
                 resource_name=body_data.get("resource_name")
             )
 
-            # map returned db matrix into list of dicts as: [{"peer_ip": "...", "peer_port": "..."}]
-            fields = ["peer_ip", "peer_port"]
-            peer_list = list(map(lambda x: {fields[i]: x[i] for i in range(len(x))}, peer_matrix))
+            # map returned db matrix into list of dicts as:
+            # [{"peer_ip": "...", "peer_port": "...", "resource_path": "...", "resource_name": "..."}]
+            peer_list = list(map(lambda x: {cls.db_get_fields[i]: x[i] for i in range(len(x))}, peer_matrix))
 
             return json.dumps(peer_list), 200
 
@@ -79,6 +81,7 @@ class ResourceController(Resource):
                 peer_id=str(body_data.get("peer_id")),
                 peer_port=int(body_data.get("peer_port")),
                 resource_name=body_data.get("resource_name"),
+                resource_path=body_data.get("resource_path"),
                 resource_hash=body_data.get("resource_hash")
             )
 

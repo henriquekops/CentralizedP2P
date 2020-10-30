@@ -78,6 +78,7 @@ class PeerController:
             "peer_id": self.peer_id,
             "peer_ip": self.peer_ip,
             "peer_port": self.thread_port,
+            "resource_path": os.path.dirname(resource_name),
             "resource_name": os.path.basename(resource_name),
             "resource_hash": self.__generate_hash(resource_name)
         }
@@ -133,10 +134,14 @@ class PeerController:
         if peers:
             peer_ip = peers[0].get("peer_ip")
             peer_port = peers[0].get("peer_port")
+            peer_resource_path = peers[0].get("resource_path")
+            peer_resource_name = peers[0].get("resource_name")
+
+            file = f"{peer_resource_path}/{peer_resource_name}".encode("utf-8")
 
             try:
                 self.socket.settimeout(10)
-                self.socket.sendto(resource_name.encode("utf-8"), (peer_ip, peer_port))
+                self.socket.sendto(file, (peer_ip, peer_port))
                 resource_data, client = self.socket.recvfrom(1024)
             except timeout:
                 return f"it looks like peer {peer_ip}:{peer_port} is not responding, interrupting connection!"
