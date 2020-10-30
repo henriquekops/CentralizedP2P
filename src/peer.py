@@ -37,12 +37,15 @@ if __name__ == "__main__":
         entry = input("> ")
         args = entry.split()
 
-        if args[0] == "-q":
+        if len(args) == 0:
+            print("input [-q, -d <resource_name>, -u <resource_name>]")
+
+        elif args[0] == "-q":
             print("bye...")
             break
 
         elif len(args) != 2 or args[0] not in commands.keys():
-            print("input [-d, -u] <resource_name>")
+            print("input [-q, -d <resource_name>, -u <resource_name>]")
 
         else:
             print(commands.get(args[0])(args[1]))
