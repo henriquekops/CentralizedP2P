@@ -3,21 +3,18 @@
 
 # built-in dependencies
 import errno
-from hashlib import md5
+import hashlib
 import json
 import os
 import socket
-from socket import timeout
-import time
-from threading import (
-    Thread,
-    Event
-)
-from uuid import uuid4
+import uuid
 
 # external dependencies
 import requests
-from requests import Response
+
+# project dependencies
+from threads.download_thread import PeerDownloadThread
+from threads.heart_beat_thread import PeerHeartBeatThread
 
 __authors__ = ["Gabriel Castro", "Gustavo Possebon", "Henrique Kops"]
 __date__ = "24/10/2020"
@@ -29,16 +26,18 @@ class PeerController:
     """
 
     def __init__(self, peer_ip: str, server_ip: str, peer_port: str, thread_port: str):
-        self.server_ip = server_ip
-        self.peer_ip = peer_ip
+        self.server_ip = str(server_ip)
+
+        self.peer_ip = str(peer_ip)
+        self.peer_id = str(uuid.uuid4())
+
         self.thread_port = int(thread_port)
-        self.peer_id = str(uuid4())
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind((peer_ip, int(peer_port)))
 
-        self.download_thread = PeerDownloadThread(peer_ip, thread_port)
-        self.heartbeat_thread = PeerHeartBeat(peer_ip, server_ip)
+        self.download_thread = PeerDownloadThread(self.peer_ip, self.thread_port)
+        self.heartbeat_thread = PeerHeartBeatThread(self.peer_id, self.server_ip)
 
         self.__create_downloads_dir()
 
@@ -60,7 +59,7 @@ class PeerController:
         :return: MD5 hash over resource's content
         """
 
-        hash_md5 = md5()
+        hash_md5 = hashlib.md5()
 
         with open(resource_name, "rb") as r:
             for chunk in iter(lambda: r.read(4096), b""):
@@ -68,7 +67,7 @@ class PeerController:
 
         return hash_md5.hexdigest()
 
-    def __upload(self, resource_path: str, resource_name: str) -> Response:
+    def __upload(self, resource_path: str, resource_name: str) -> requests.Response:
         """
         Call server to register resource and assign to this peer
 
@@ -94,7 +93,7 @@ class PeerController:
             headers=header
         )
 
-    def __download(self, resource_name: str) -> Response:
+    def __download(self, resource_name: str) -> requests.Response:
         """
         Call server to search peer ips that contains this resource
 
@@ -151,90 +150,15 @@ class PeerController:
                 self.socket.settimeout(10)
                 self.socket.sendto(file, (peer_ip, peer_port))
                 resource_data, client = self.socket.recvfrom(1024)
-            except timeout:
-                return f"it looks like peer {peer_ip}:{peer_port} is not responding, interrupting connection!"
+
+            except socket.timeout:
+                return f"it looks like peer '{peer_ip}:{peer_port}' is not responding, interrupting connection!"
 
             file_path = f"downloads/{peer_ip}_{resource_name}"
             resource_file = open(file_path, "wb")
             resource_file.write(resource_data)
+
             return f"resource '{resource_name}' downloaded at path '{file_path}'!"
 
         else:
             return f"no peers found for resource '{resource_name}'!"
-
-
-class PeerDownloadThread(Thread):
-    """
-    Peer thread for local file download
-    """
-
-    def __init__(self, peer_ip, peer_port, *args, **kwargs):
-        super(PeerDownloadThread, self).__init__(*args, **kwargs)
-
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.bind((peer_ip, int(peer_port)))
-        self._stop_event = Event()
-
-    def run(self) -> None:
-        """
-        Overrides the default thread's behaviour to
-        send a local file content through UDP socket
-        """
-
-        while not self._stop_event.is_set():
-            try:
-                self.socket.settimeout(1)
-                msg, client = self.socket.recvfrom(1024)
-                resource = open(msg, "rb")
-                resource_data = resource.read(1024)
-                self.socket.sendto(resource_data, client)
-            except timeout:
-                pass
-
-    def stop(self) -> None:
-        """
-        Kills the running thread
-        """
-
-        self._stop_event.set()
-
-
-class PeerHeartBeat(Thread):
-    """
-    Peer thread for heart beat
-    """
-
-    def __init__(self, peer_ip, server_ip, *args, **kwargs):
-        super(PeerHeartBeat).__init__(*args, **kwargs)
-
-        self.peer_ip = peer_ip
-        self.server_ip = server_ip
-        self.__stop_event = Event()
-
-    def run(self) -> None:
-        """
-        Overrides the default thread's behaviour to
-        consume a heartbeat route at central server
-        """
-
-        body = {
-            "peer_ip": self.peer_ip
-        }
-        headers = {
-            "Content-Type: application/json"
-        }
-
-        while not self.__stop_event.is_set():
-            requests.get(
-                f"{self.server_ip}:5000/heartbeat",
-                data=json.dumps(body),
-                headers=headers
-            )
-            time.sleep(5)
-
-    def stop(self) -> None:
-        """
-        Kills the running thread
-        """
-
-        self.__stop_event.set()

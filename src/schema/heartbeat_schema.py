@@ -13,4 +13,4 @@ class GetHeartbeatSchema(Schema):
     Schema validation for server's 'GET' route (/heartbeat)
     """
 
-    peer_ip = fields.IPv4()
+    peer_id = fields.UUID()

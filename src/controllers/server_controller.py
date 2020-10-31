@@ -17,9 +17,12 @@ from schema.resource_schema import (
     GetResourceSchema,
     PostResourceSchema
 )
+from threads.heart_beat_thread import ServerHeartBeatThread
 
 __authors__ = ["Gabriel Castro", "Gustavo Possebon", "Henrique Kops"]
 __date__ = "24/10/2020"
+
+db_access = DatabaseResourceTableController()
 
 
 class ResourceController(Resource):
@@ -29,8 +32,6 @@ class ResourceController(Resource):
 
     post_schema = PostResourceSchema()
     get_schema = GetResourceSchema()
-
-    db_access = DatabaseResourceTableController()
 
     db_get_fields = ["peer_ip", "peer_port", "resource_path", "resource_name"]
 
@@ -49,8 +50,8 @@ class ResourceController(Resource):
         try:
             body_data = cls.get_schema.load(body)
 
-            peer_matrix = cls.db_access.get_available_peers(
-                resource_name=body_data.get("resource_name")
+            peer_matrix = db_access.get_available_peers(
+                resource_name=str(body_data.get("resource_name"))
             )
 
             # map returned db matrix into list of dicts as:
@@ -77,13 +78,13 @@ class ResourceController(Resource):
         try:
             body_data = cls.post_schema.load(body)
 
-            cls.db_access.register_peer(
+            db_access.register_peer(
                 peer_ip=str(body_data.get("peer_ip")),
                 peer_id=str(body_data.get("peer_id")),
                 peer_port=int(body_data.get("peer_port")),
-                resource_name=body_data.get("resource_name"),
-                resource_path=body_data.get("resource_path"),
-                resource_hash=body_data.get("resource_hash")
+                resource_name=str(body_data.get("resource_name")),
+                resource_path=str(body_data.get("resource_path")),
+                resource_hash=str(body_data.get("resource_hash"))
             )
 
             return json.dumps(body), 200
@@ -99,8 +100,10 @@ class HeartBeatController(Resource):
 
     get_schema = GetHeartbeatSchema()
 
+    peer_map = dict()
+
     @classmethod
-    def get(cls) -> Tuple:
+    def post(cls) -> Tuple:
 
         body = request.get_json()
 
@@ -110,8 +113,25 @@ class HeartBeatController(Resource):
         try:
 
             body_data = cls.get_schema.load(body)
+            peer_id = str(body_data.get("peer_id"))
 
-            # TODO: add body to some list
+            if peer_id not in cls.peer_map.keys():
+                new_queue = list()
+                new_queue.append(1)
+
+                cls.peer_map.update({
+                    peer_id: new_queue
+                })
+
+                server_heart_beat_thread = ServerHeartBeatThread(peer_id, new_queue, db_access)
+                server_heart_beat_thread.start()
+
+            else:
+                peer_queue = cls.peer_map.get(peer_id)
+
+                if 0 in peer_queue:
+                    _ = cls.peer_map.pop(peer_id)
+                peer_queue.append(1)
 
             return "OK", 200
 

@@ -6,7 +6,7 @@ import flask
 import flask_restful
 
 # project dependencies
-from controllers.server_controller import ResourceController
+from controllers.server_controller import ResourceController, HeartBeatController
 from controllers.database_controller import DatabaseResourceTableController
 
 __authors__ = ["Gabriel Castro", "Gustavo Possebon", "Henrique Kops"]
@@ -17,6 +17,7 @@ if __name__ == "__main__":
     api = flask_restful.Api(app)
 
     api.add_resource(ResourceController, "/resource")
+    api.add_resource(HeartBeatController, "/heartbeat")
 
     access = DatabaseResourceTableController()
     access.create_database()
