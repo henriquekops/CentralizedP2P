@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # external dependencies
+import sqlalchemy
 from sqlalchemy import (
     Column,
     Integer,
@@ -16,7 +17,6 @@ Base = declarative_base()
 
 
 class ResourceTable(Base):
-
     """
     Database resource table
     """
@@ -31,3 +31,13 @@ class ResourceTable(Base):
     resourceName = Column(String(100), nullable=False)  # resource's name
     resourcePath = Column(String(100), nullable=False)  # resource's path at peerIp:peerPort
     resourceHash = Column(String(50), nullable=False)  # resource's hash
+
+
+def create_table() -> None:
+    """
+    Create all sqlite3 databases registered at 'Base' object through declared 'engine'
+    """
+
+    engine = sqlalchemy.create_engine("sqlite:///db.sqlite3")
+    if not engine.dialect.has_table(engine, "resources"):
+        Base.metadata.create_all(engine)

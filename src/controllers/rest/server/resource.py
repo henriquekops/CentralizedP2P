@@ -3,44 +3,42 @@
 
 # built-in dependencies
 import json
-from typing import Tuple
+import typing
 
 # external dependencies
-from flask import request
-from flask_restful import Resource
-from marshmallow import ValidationError
+import flask
+import flask_restful
+import marshmallow
 
 # project dependencies
-from controllers.database_controller import DatabaseResourceTableController
-from schema.resource_schema import (
-    GetSchema,
-    PostSchema
+from controllers.database import get_database_resource_table_controller
+from schema.resource import (
+    GetResourceSchema,
+    PostResourceSchema
 )
 
 __authors__ = ["Gabriel Castro", "Gustavo Possebon", "Henrique Kops"]
 __date__ = "24/10/2020"
 
 
-class ResourceController(Resource):
+class ResourceController(flask_restful.Resource):
     """
     Controller for '/resource' route
     """
 
-    post_schema = PostSchema()
-    get_schema = GetSchema()
-
-    db_access = DatabaseResourceTableController()
-
+    post_schema = PostResourceSchema()
+    get_schema = GetResourceSchema()
+    db_access = get_database_resource_table_controller()
     db_get_fields = ["peer_ip", "peer_port", "resource_path", "resource_name"]
 
     @classmethod
-    def get(cls) -> Tuple:
+    def get(cls) -> typing.Tuple:
         """
         Retrieve every peer's info that contains such resource
         :return: List of peer's info
         """
 
-        body = request.get_json()
+        body = flask.request.get_json()
 
         if not body:
             return "No body", 400
@@ -49,7 +47,7 @@ class ResourceController(Resource):
             body_data = cls.get_schema.load(body)
 
             peer_matrix = cls.db_access.get_available_peers(
-                resource_name=body_data.get("resource_name")
+                resource_name=str(body_data.get("resource_name"))
             )
 
             # map returned db matrix into list of dicts as:
@@ -58,17 +56,17 @@ class ResourceController(Resource):
 
             return json.dumps(peer_list), 200
 
-        except ValidationError as error:
+        except marshmallow.ValidationError as error:
             return error.messages, 422
 
     @classmethod
-    def post(cls) -> Tuple:
+    def post(cls) -> typing.Tuple:
         """
         Assign a new resource to a peer
         :return: Request body
         """
 
-        body = request.get_json()
+        body = flask.request.get_json()
 
         if not body:
             return "No body", 400
@@ -80,12 +78,12 @@ class ResourceController(Resource):
                 peer_ip=str(body_data.get("peer_ip")),
                 peer_id=str(body_data.get("peer_id")),
                 peer_port=int(body_data.get("peer_port")),
-                resource_name=body_data.get("resource_name"),
-                resource_path=body_data.get("resource_path"),
-                resource_hash=body_data.get("resource_hash")
+                resource_name=str(body_data.get("resource_name")),
+                resource_path=str(body_data.get("resource_path")),
+                resource_hash=str(body_data.get("resource_hash"))
             )
 
             return json.dumps(body), 200
 
-        except ValidationError as error:
+        except marshmallow.ValidationError as error:
             return error.messages, 422

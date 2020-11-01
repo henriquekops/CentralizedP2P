@@ -8,7 +8,7 @@ __authors__ = ["Gabriel Castro", "Gustavo Possebon", "Henrique Kops"]
 __date__ = "24/10/2020"
 
 
-class GetSchema(Schema):
+class GetResourceSchema(Schema):
     """
     Schema validation for server's 'GET' route (/resource)
     """
@@ -16,7 +16,7 @@ class GetSchema(Schema):
     resource_name = fields.String()
 
 
-class PostSchema(Schema):
+class PostResourceSchema(Schema):
     """
     Schema validation for server's 'POST' route (/resource)
     """

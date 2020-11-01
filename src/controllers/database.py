@@ -2,37 +2,32 @@
 # -*- coding: utf-8 -*-
 
 # built-in dependencies
-from typing import List
+import functools
+import typing
 
 # external dependencies
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 
 # project dependencies
-from database.resource_table import (Base, ResourceTable)
+from database.table import ResourceTable
 
 __authors__ = ["Gabriel Castro", "Gustavo Possebon", "Henrique Kops"]
 __date__ = "24/10/2020"
 
 
-class DatabaseResourceTableController:
+class _DatabaseResourceTableController:
     """
     Controller for resource table access
     """
 
     def __init__(self):
+        # sqlalchemy
         self.engine = sqlalchemy.create_engine("sqlite:///db.sqlite3")
         self.session = sessionmaker(bind=self.engine)
 
-    def create_database(self):
-        """
-        Create all sqlite3 databases registered at 'Base' object through declared 'engine'
-        """
-
-        Base.metadata.create_all(self.engine)
-
-    def register_peer(self, peer_id: str, peer_ip: str, peer_port: int, resource_name: str, resource_path: str,
-                      resource_hash: str) -> None:
+    def register_peer(self, peer_id: str, peer_ip: str, peer_port: int,
+                      resource_name: str, resource_path: str, resource_hash: str) -> None:
         """
         Register peer-resource relationship at database
 
@@ -62,7 +57,7 @@ class DatabaseResourceTableController:
         finally:
             session.close()
 
-    def get_available_peers(self, resource_name: str) -> List:
+    def get_available_peers(self, resource_name: str) -> typing.List:
         """
         Get every peer's info and port that has registered same resource name
 
@@ -103,3 +98,12 @@ class DatabaseResourceTableController:
             session.commit()
         finally:
             session.close()
+
+
+@functools.lru_cache()
+def get_database_resource_table_controller() -> [_DatabaseResourceTableController]:
+    """
+    Singleton for DatabaseResourceTableController class
+    """
+
+    return _DatabaseResourceTableController()
