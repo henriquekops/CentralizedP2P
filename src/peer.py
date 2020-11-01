@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 # built-in dependencies
-import time
 import sys
 
 # project dependencies
@@ -22,17 +21,13 @@ if __name__ == "__main__":
     peer_port = sys.argv[3]
     thread_port = sys.argv[4]
 
-    print("peer starting...")
-
-    peer = PeerController(peer_ip, server_ip, peer_port, thread_port)
-    peer.heartbeat_thread.start()
-    peer.download_thread.start()
-
-    # wait for connection exceptions
-    time.sleep(2)
-
     print("peer running!")
     print("commands:\n\t-u <resource_name> = upload\n\t-d <resource_name> = download \n\t-q = quit")
+
+    peer = PeerController(peer_ip, server_ip, peer_port, thread_port)
+
+    peer.heartbeat_thread.start()
+    peer.download_thread.start()
 
     commands = {
         "-u": peer.upload,
@@ -41,12 +36,13 @@ if __name__ == "__main__":
 
     try:
         while True:
+            entry = input("> ")
+
             if not peer.thread_exceptions.empty():
                 exception = peer.thread_exceptions.get_nowait()
                 print(f'error: {exception}')
                 sys.exit(2)
 
-            entry = input("> ")
             args = entry.split()
 
             if len(args) == 0:

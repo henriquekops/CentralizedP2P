@@ -10,7 +10,6 @@ import flask_restful
 import marshmallow
 
 # project dependencies
-from controllers.database import get_database_resource_table_controller
 from schema.heartbeat import PostHeartbeatSchema
 from threads.server.heartbeat import ServerHeartBeatThread
 
@@ -24,6 +23,7 @@ class HeartBeatController(flask_restful.Resource):
     """
 
     get_schema = PostHeartbeatSchema()
+    threads = list()
     peer_map = dict()
 
     @classmethod
@@ -49,10 +49,17 @@ class HeartBeatController(flask_restful.Resource):
                 })
 
                 server_heart_beat_thread = ServerHeartBeatThread(peer_id, new_queue)
+                cls.threads.append(server_heart_beat_thread)
                 server_heart_beat_thread.start()
 
             else:
                 peer_queue = cls.peer_map.get(peer_id)
+
+                # when thread finishes, it produces a `0` at its queue (runs when peer restarts)
+                if 0 in peer_queue:
+                    server_heart_beat_thread = ServerHeartBeatThread(peer_id, peer_queue)
+                    cls.threads.append(server_heart_beat_thread)
+                    server_heart_beat_thread.start()
 
                 # tell heartbeat thread that a request has arrived
                 peer_queue.append(1)
@@ -61,3 +68,15 @@ class HeartBeatController(flask_restful.Resource):
 
         except marshmallow.ValidationError as error:
             return error.messages, 422
+
+    @classmethod
+    def stop_threads(cls):
+        """
+        Stop all serve's heartbeat threads
+        """
+
+        print("\nstopping threads ...")
+
+        for t in cls.threads:
+            t.stop()
+            t.join()

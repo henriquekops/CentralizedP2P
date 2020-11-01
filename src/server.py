@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # external dependencies
+import atexit
 import flask
 import flask_restful
 
@@ -16,6 +17,8 @@ __date__ = "24/10/2020"
 if __name__ == "__main__":
     app = flask.Flask(__name__)
     api = flask_restful.Api(app)
+
+    atexit.register(HeartBeatController.stop_threads)
 
     api.add_resource(ResourceController, "/resource")
     api.add_resource(HeartBeatController, "/heartbeat")
