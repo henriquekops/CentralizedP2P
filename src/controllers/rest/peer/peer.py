@@ -76,14 +76,29 @@ class PeerRESTController:
         :return: Central server's response
         """
 
-        body = {
-            "resource_name": resource_name
-        }
         header = {
             "content-type": "application/json; charset=utf-8"
         }
         return requests.get(
             f"http://{server_ip}:5000/resource",
             data=json.dumps(body),
+            headers=header
+        )
+
+    @staticmethod
+    def call_server_get_all_resources(server_ip: str) -> requests.Response:
+        """
+        Call server to search peer ips that contains this resource
+
+        :param resource_name: Resource provided by this peer
+        :param server_ip: Central server's ipv4
+        :return: Central server's response
+        """
+
+        header = {
+            "content-type": "application/json; charset=utf-8"
+        }
+        return requests.get(
+            f"http://{server_ip}:5000/resource",
             headers=header
         )

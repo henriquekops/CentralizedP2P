@@ -118,3 +118,17 @@ class PeerController:
 
         else:
             return f"no peers found for resource '{resource_name}'!"
+
+    def list(self) -> str:
+        """
+        Lists all resources
+
+        :return String response for the client
+        """
+
+        response = self.rest_controller.call_server_get_all_resources(
+            server_ip=self.server_ip
+        )
+        peers = json.loads(response.json())
+
+        return peers
