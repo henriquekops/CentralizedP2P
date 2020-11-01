@@ -3,46 +3,42 @@
 
 # built-in dependencies
 import json
-from typing import Tuple
+import typing
 
 # external dependencies
-from flask import request
-from flask_restful import Resource
-from marshmallow import ValidationError
+import flask
+import flask_restful
+import marshmallow
 
 # project dependencies
-from controllers.database_controller import DatabaseResourceTableController
-from schema.heartbeat_schema import GetHeartbeatSchema
-from schema.resource_schema import (
+from controllers.database import get_database_resource_table_controller
+from schema.resource import (
     GetResourceSchema,
     PostResourceSchema
 )
-from threads.heart_beat_thread import ServerHeartBeatThread
 
 __authors__ = ["Gabriel Castro", "Gustavo Possebon", "Henrique Kops"]
 __date__ = "24/10/2020"
 
-db_access = DatabaseResourceTableController()
 
-
-class ResourceController(Resource):
+class ResourceController(flask_restful.Resource):
     """
     Controller for '/resource' route
     """
 
     post_schema = PostResourceSchema()
     get_schema = GetResourceSchema()
-
+    db_access = get_database_resource_table_controller()
     db_get_fields = ["peer_ip", "peer_port", "resource_path", "resource_name"]
 
     @classmethod
-    def get(cls) -> Tuple:
+    def get(cls) -> typing.Tuple:
         """
         Retrieve every peer's info that contains such resource
         :return: List of peer's info
         """
 
-        body = request.get_json()
+        body = flask.request.get_json()
 
         if not body:
             return "No body", 400
@@ -50,7 +46,7 @@ class ResourceController(Resource):
         try:
             body_data = cls.get_schema.load(body)
 
-            peer_matrix = db_access.get_available_peers(
+            peer_matrix = cls.db_access.get_available_peers(
                 resource_name=str(body_data.get("resource_name"))
             )
 
@@ -60,17 +56,17 @@ class ResourceController(Resource):
 
             return json.dumps(peer_list), 200
 
-        except ValidationError as error:
+        except marshmallow.ValidationError as error:
             return error.messages, 422
 
     @classmethod
-    def post(cls) -> Tuple:
+    def post(cls) -> typing.Tuple:
         """
         Assign a new resource to a peer
         :return: Request body
         """
 
-        body = request.get_json()
+        body = flask.request.get_json()
 
         if not body:
             return "No body", 400
@@ -78,7 +74,7 @@ class ResourceController(Resource):
         try:
             body_data = cls.post_schema.load(body)
 
-            db_access.register_peer(
+            cls.db_access.register_peer(
                 peer_ip=str(body_data.get("peer_ip")),
                 peer_id=str(body_data.get("peer_id")),
                 peer_port=int(body_data.get("peer_port")),
@@ -89,51 +85,5 @@ class ResourceController(Resource):
 
             return json.dumps(body), 200
 
-        except ValidationError as error:
-            return error.messages, 422
-
-
-class HeartBeatController(Resource):
-    """
-    Controller for '/heartbeat' route
-    """
-
-    get_schema = GetHeartbeatSchema()
-
-    peer_map = dict()
-
-    @classmethod
-    def post(cls) -> Tuple:
-
-        body = request.get_json()
-
-        if not body:
-            return "No body", 400
-
-        try:
-
-            body_data = cls.get_schema.load(body)
-            peer_id = str(body_data.get("peer_id"))
-
-            if peer_id not in cls.peer_map.keys():
-                new_queue = list()
-                new_queue.append(1)
-
-                cls.peer_map.update({
-                    peer_id: new_queue
-                })
-
-                server_heart_beat_thread = ServerHeartBeatThread(peer_id, new_queue, db_access)
-                server_heart_beat_thread.start()
-
-            else:
-                peer_queue = cls.peer_map.get(peer_id)
-
-                if 0 in peer_queue:
-                    _ = cls.peer_map.pop(peer_id)
-                peer_queue.append(1)
-
-            return "OK", 200
-
-        except ValidationError as error:
+        except marshmallow.ValidationError as error:
             return error.messages, 422

@@ -8,9 +8,9 @@ __authors__ = ["Gabriel Castro", "Gustavo Possebon", "Henrique Kops"]
 __date__ = "29/10/2020"
 
 
-class GetHeartbeatSchema(Schema):
+class PostHeartbeatSchema(Schema):
     """
-    Schema validation for server's 'GET' route (/heartbeat)
+    Schema validation for server's 'POST' route (/heartbeat)
     """
 
     peer_id = fields.UUID()
