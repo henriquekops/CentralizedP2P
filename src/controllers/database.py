@@ -73,7 +73,8 @@ class _DatabaseResourceTableController:
                     ResourceTable.peerIp,
                     ResourceTable.peerPort,
                     ResourceTable.resourcePath,
-                    ResourceTable.resourceName
+                    ResourceTable.resourceName,
+                    ResourceTable.resourceHash
                 )\
                 .filter(ResourceTable.resourceName == resource_name)\
                 .group_by(ResourceTable.peerId)\
@@ -97,7 +98,8 @@ class _DatabaseResourceTableController:
                     ResourceTable.peerIp,
                     ResourceTable.peerPort,
                     ResourceTable.resourcePath,
-                    ResourceTable.resourceName
+                    ResourceTable.resourceName,
+                    ResourceTable.resourceHash
                 )\
                 .group_by(ResourceTable.peerId)\
                 .all()

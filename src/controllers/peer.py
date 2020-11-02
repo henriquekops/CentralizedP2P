@@ -13,6 +13,7 @@ import uuid
 from controllers.rest.peer.peer import PeerRESTController
 from threads.peer.download import PeerDownloadThread
 from threads.peer.heartbeat import PeerHeartBeatThread
+from utils.hash import generate_hash
 
 __authors__ = ["Gabriel Castro", "Gustavo Possebon", "Henrique Kops"]
 __date__ = "24/10/2020"
@@ -99,6 +100,7 @@ class PeerController:
             peer_port = peers[0].get("peer_port")
             peer_resource_path = peers[0].get("resource_path")
             peer_resource_name = peers[0].get("resource_name")
+            peer_resource_hash = peers[0].get("resource_hash")
 
             file = f"{peer_resource_path}/{peer_resource_name}".encode("utf-8")
 
@@ -110,11 +112,18 @@ class PeerController:
             except socket.timeout:
                 return f"it looks like peer '{peer_ip}:{peer_port}' is not responding, interrupting connection!"
 
-            file_path = f"downloads/{peer_ip}_{resource_name}"
-            resource_file = open(file_path, "wb")
+            file_path = f"downloads"
+            file_name = f"{peer_ip}_{resource_name}"
+            resource_file = open(f"{file_path}/{file_name}", "wb")
             resource_file.write(resource_data)
+            resource_file.close()
 
-            return f"resource '{resource_name}' downloaded at path '{file_path}'!"
+            downloaded_hash = generate_hash(file_path, file_name)
+
+            if peer_resource_hash == downloaded_hash:
+                return f"resource '{resource_name}' downloaded at path '{file_path}'!"
+            return f"resource '{resource_name}' downloaded at path '{file_path}' but " \
+                   f"hash is incorrect, file might be corrupted!"
 
         else:
             return f"no peers found for resource '{resource_name}'!"

@@ -29,7 +29,7 @@ class ResourceController(flask_restful.Resource):
     post_schema = PostResourceSchema()
     get_schema = GetResourceSchema()
     db_access = get_database_resource_table_controller()
-    db_get_fields = ["peer_ip", "peer_port", "resource_path", "resource_name"]
+    db_get_fields = ["peer_ip", "peer_port", "resource_path", "resource_name", "resource_hash"]
 
     @classmethod
     def get(cls) -> typing.Tuple:
@@ -58,7 +58,6 @@ class ResourceController(flask_restful.Resource):
         resource_list = list(map(lambda x: {cls.db_get_fields[i]: x[i] for i in range(len(x))}, resource_matrix))
 
         return json.dumps(resource_list), 200
-
 
     @classmethod
     def post(cls) -> typing.Tuple:
