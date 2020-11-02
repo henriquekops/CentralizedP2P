@@ -33,31 +33,32 @@ class ResourceController(flask_restful.Resource):
 
     @classmethod
     def get(cls) -> typing.Tuple:
+
         """
-        Retrieve every peer's info that contains such resource
-        :return: List of peer's info
+        Retrieve every peer's info OR every peer's info that contains a certain resource
+        :return: List of all peer's info OR every peer's info that contains a certain resource
         """
 
         body = flask.request.get_json()
+        resource_matrix = None
 
         if not body:
-            return "No body", 400
+            resource_matrix = cls.db_access.get_all_resources()
+        else:
+            try:
+                body_data = cls.get_schema.load(body)
+                resource_matrix = cls.db_access.get_available_peers(
+                    resource_name=str(body_data.get("resource_name"))
+                )
+            except marshmallow.ValidationError as error:
+                return error.messages, 422
 
-        try:
-            body_data = cls.get_schema.load(body)
+        # map returned db matrix into list of dicts as:
+        # [{"peer_ip": "...", "peer_port": "...", "resource_name": "..."}]
+        resource_list = list(map(lambda x: {cls.db_get_fields[i]: x[i] for i in range(len(x))}, resource_matrix))
 
-            peer_matrix = cls.db_access.get_available_peers(
-                resource_name=str(body_data.get("resource_name"))
-            )
+        return json.dumps(resource_list), 200
 
-            # map returned db matrix into list of dicts as:
-            # [{"peer_ip": "...", "peer_port": "...", "resource_path": "...", "resource_name": "..."}]
-            peer_list = list(map(lambda x: {cls.db_get_fields[i]: x[i] for i in range(len(x))}, peer_matrix))
-
-            return json.dumps(peer_list), 200
-
-        except marshmallow.ValidationError as error:
-            return error.messages, 422
 
     @classmethod
     def post(cls) -> typing.Tuple:

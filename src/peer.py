@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # built-in dependencies
+import pprint
 import sys
 
 # project dependencies
@@ -22,17 +23,17 @@ if __name__ == "__main__":
     thread_port = sys.argv[4]
 
     print("peer running!")
-    print("commands:\n\t-u <resource_name> = upload\n\t-d <resource_name> = download \n\t-q = quit")
+    print("commands:\n\t"
+          "-u <resource_name> = upload\n\t"
+          "-d <resource_name> = download\n\t"
+          "-l = list all resources \n\t"
+          "-q = quit")
 
     peer = PeerController(peer_ip, server_ip, peer_port, thread_port)
 
     peer.heartbeat_thread.start()
     peer.download_thread.start()
-
-    commands = {
-        "-u": peer.upload,
-        "-d": peer.download,
-    }
+    commands = ["-u", "-d", "-l"]
 
     try:
         while True:
@@ -46,17 +47,24 @@ if __name__ == "__main__":
             args = entry.split()
 
             if len(args) == 0:
-                print("input [-q, -d <resource_name>, -u <resource_name>]")
+                print("input [-q, -l, -d <resource_name>, -u <resource_name>]")
 
             elif args[0] == "-q":
                 print("bye...")
                 break
 
-            elif len(args) != 2 or args[0] not in commands.keys():
-                print("input [-q, -d <resource_name>, -u <resource_name>]")
+            elif args[0] not in commands or len(args) > 2 or len(args) == 0:
+                print("input [-q, -l, -d <resource_name>, -u <resource_name>]")
 
-            else:
-                print(commands.get(args[0])(args[1]))
+            elif args[0] == "-l":
+                result = peer.list()
+                pprint.pprint(result)
+
+            elif args[0] == "-d":
+                pprint.pprint(peer.download(args[1]))
+
+            elif args[0] == "-u":
+                pprint.pprint(peer.upload(args[1]))
 
     finally:
         peer.heartbeat_thread.stop()

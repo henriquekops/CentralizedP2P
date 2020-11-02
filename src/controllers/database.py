@@ -82,6 +82,29 @@ class _DatabaseResourceTableController:
         finally:
             session.close()
 
+    def get_all_resources(self) -> typing.List:
+        """
+        Get every peer's info and port that has registered same resource name
+
+        :return: List of every peer's info
+        """
+
+        session = self.session()
+
+        try:
+            return session\
+                .query(
+                    ResourceTable.peerIp,
+                    ResourceTable.peerPort,
+                    ResourceTable.resourcePath,
+                    ResourceTable.resourceName
+                )\
+                .group_by(ResourceTable.peerId)\
+                .all()
+
+        finally:
+            session.close()
+
     def drop_peer(self, peer_id: str) -> None:
         """
         Delete every peer's record through its id
