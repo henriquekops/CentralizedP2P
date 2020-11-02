@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+Module that defines base implementation for all project's threads
+"""
+
 # built-in dependencies
 import threading
 
@@ -15,11 +19,12 @@ class BaseThread(threading.Thread):
 
     def __init__(self, *args, **kwargs):
         super(BaseThread, self).__init__(*args, **kwargs)
+
         self.stop_event = threading.Event()
 
     def stop(self) -> None:
         """
-        Kills running threads
+        Kills this thread
         """
 
         self.stop_event.set()

@@ -1,29 +1,48 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+Module that defines '/resource' routes body's schemas
+"""
+
 # external dependencies
-from marshmallow import Schema, fields
+import marshmallow
 
 __authors__ = ["Gabriel Castro", "Gustavo Possebon", "Henrique Kops"]
 __date__ = "24/10/2020"
 
 
-class GetResourceSchema(Schema):
+class GetResourceSchema(marshmallow.Schema):
     """
-    Schema validation for server's 'GET' route (/resource)
-    """
+    Schema validation for central server's 'GET' route (/resource)
 
-    resource_name = fields.String()
-
-
-class PostResourceSchema(Schema):
-    """
-    Schema validation for server's 'POST' route (/resource)
+    Example:
+    {
+        resource_name: <String>
+    }
     """
 
-    peer_id = fields.UUID()
-    peer_ip = fields.IPv4()
-    peer_port = fields.Int()
-    resource_name = fields.String()
-    resource_path = fields.String()
-    resource_hash = fields.String()
+    resource_name = marshmallow.fields.String()
+
+
+class PostResourceSchema(marshmallow.Schema):
+    """
+    Schema validation for central server's 'POST' route (/resource)
+
+    Example:
+    {
+        peer_id: <UUID>
+        peer_ip: <IPV4>
+        peer_port: <Int>
+        resource_name: <String>
+        resource_path: <String>
+        resource_hash: <String>
+    }
+    """
+
+    peer_id = marshmallow.fields.UUID()
+    peer_ip = marshmallow.fields.IPv4()
+    peer_port = marshmallow.fields.Int()
+    resource_name = marshmallow.fields.String()
+    resource_path = marshmallow.fields.String()
+    resource_hash = marshmallow.fields.String()

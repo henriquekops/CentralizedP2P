@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+Module that defines a controller for database's operations over business rules
+"""
+
 # built-in dependencies
 import functools
 import typing
@@ -29,7 +33,7 @@ class _DatabaseResourceTableController:
     def register_peer(self, peer_id: str, peer_ip: str, peer_port: int,
                       resource_name: str, resource_path: str, resource_hash: str) -> None:
         """
-        Register peer-resource relationship at database
+        Register 'peer x resource' relationship at database
 
         :param peer_id: Peer's id
         :param peer_ip: Peer's ip
@@ -57,18 +61,19 @@ class _DatabaseResourceTableController:
         finally:
             session.close()
 
-    def get_available_peers(self, resource_name: str) -> typing.List:
+    def get_available_peer(self, resource_name: str) -> typing.List:
         """
-        Get every peer's info and port that has registered same resource name
+        Get peer's ip and port and resource's path, name and hash
+        that contains same resource name
 
         :param resource_name: Name of the resource to be searched at database
-        :return: List of every peer's info
+        :return: List containing matching peer's and resource's info
         """
 
         session = self.session()
 
         try:
-            return session\
+            available_peers = session\
                 .query(
                     ResourceTable.peerIp,
                     ResourceTable.peerPort,
@@ -80,14 +85,20 @@ class _DatabaseResourceTableController:
                 .group_by(ResourceTable.peerId)\
                 .all()
 
+            if available_peers:
+                return [list(available_peers[0])]
+
+            else:
+                return []
+
         finally:
             session.close()
 
     def get_all_resources(self) -> typing.List:
         """
-        Get every peer's info and port that has registered same resource name
+        Get every register of peer's ip and port and resource's path, name and hash
 
-        :return: List of every peer's info
+        :return: List of every 'peer x resource' info
         """
 
         session = self.session()
@@ -109,7 +120,7 @@ class _DatabaseResourceTableController:
 
     def drop_peer(self, peer_id: str) -> None:
         """
-        Delete every peer's record through its id
+        Delete every record that contains same peer's id
 
         :param peer_id: Peer's ip to be used as filter
         """
@@ -121,6 +132,7 @@ class _DatabaseResourceTableController:
                 .filter(ResourceTable.peerId == peer_id)\
                 .delete()
             session.commit()
+
         finally:
             session.close()
 
@@ -129,6 +141,8 @@ class _DatabaseResourceTableController:
 def get_database_resource_table_controller() -> [_DatabaseResourceTableController]:
     """
     Singleton for DatabaseResourceTableController class
+
+    :return: Same instance for DatabaseResourceTableController class
     """
 
     return _DatabaseResourceTableController()
