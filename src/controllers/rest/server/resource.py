@@ -60,26 +60,6 @@ class ResourceController(flask_restful.Resource):
         return json.dumps(resource_list), 200
 
 
-
-    @classmethod
-    def get(cls, resource_name) -> typing.Tuple:
-        """
-        Retrieve every peer's info that contains such resource
-        :return: List of peer's info
-        """
-
-        try:
-            peer_matrix = cls.db_access.get_available_peers(resource_name=resource_name)
-
-            # map returned db matrix into list of dicts as:
-            # [{"peer_ip": "...", "peer_port": "...", "resource_path": "...", "resource_name": "..."}]
-            peer_list = list(map(lambda x: {cls.db_get_fields[i]: x[i] for i in range(len(x))}, peer_matrix))
-
-            return json.dumps(peer_list), 200
-
-        except marshmallow.ValidationError as error:
-            return error.messages, 422
-
     @classmethod
     def post(cls) -> typing.Tuple:
         """

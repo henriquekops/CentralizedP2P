@@ -129,6 +129,7 @@ class PeerController:
         response = self.rest_controller.call_server_get_all_resources(
             server_ip=self.server_ip
         )
+
         peers = json.loads(response.json())
 
         return peers

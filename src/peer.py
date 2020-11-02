@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # built-in dependencies
+import pprint
 import sys
 
 # project dependencies
@@ -36,7 +37,7 @@ if __name__ == "__main__":
     commands = {
         "-u": peer.upload,
         "-d": peer.download,
-        "-l": peer.list,
+        "-l": peer.list
     }
 
     try:
@@ -57,11 +58,18 @@ if __name__ == "__main__":
                 print("bye...")
                 break
 
-            elif args[0] not in commands.keys() or len(args) > 2:
+            elif args[0] not in commands.keys() or len(args) > 2 or len(args) == 0:
                 print("input [-q, -l, -d <resource_name>, -u <resource_name>]")
 
-            else:
-                print(commands.get(args[0])(args[1]))
+            elif args[0] == "-l":
+                result = peer.list()
+                pprint.pprint(result)
+
+            elif args[0] == "-d":
+                pprint.pprint(peer.download(args[1]))
+
+            elif args[0] == "-u":
+                pprint.pprint(peer.upload(args[1]))
 
     finally:
         peer.heartbeat_thread.stop()
