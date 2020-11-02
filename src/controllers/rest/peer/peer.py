@@ -9,7 +9,7 @@ import json
 import requests
 
 # project dependencies
-from utils.hash import HashUtil
+from utils.hash import generate_hash
 
 __authors__ = ["Gabriel Castro", "Gustavo Possebon", "Henrique Kops"]
 __date__ = "24/10/2020"
@@ -40,7 +40,7 @@ class PeerRESTController:
             "peer_port": thread_port,
             "resource_path": resource_path,
             "resource_name": resource_name,
-            "resource_hash": HashUtil.generate_hash(resource_path, resource_name)
+            "resource_hash": generate_hash(resource_path, resource_name)
         }
         header = {
             "content-type": "application/json; charset=utf-8"

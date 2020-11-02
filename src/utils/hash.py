@@ -8,22 +8,22 @@ __authors__ = ["Gabriel Castro", "Gustavo Possebon", "Henrique Kops"]
 __date__ = "24/10/2020"
 
 
-class HashUtil:
+def generate_hash(resource_path: str, resource_name: str) -> str:
+    """
+    Generates a MD5 hash over resource's content
+    :param resource_path: Resource's path (provided by this peer)
+    :param resource_name: Resource's name (provided by this peer)
+    :return: MD5 hash over resource's content
+    """
 
-    @staticmethod
-    def generate_hash(resource_path: str, resource_name: str) -> str:
-        """
-        Generates a MD5 hash over resource's content
+    print(f"Path: {resource_path} | Nome: {resource_name}")
+    print(open(f"{resource_path}/{resource_name}", "r"))
 
-        :param resource_path: Resource's path (provided by this peer)
-        :param resource_name: Resource's name (provided by this peer)
-        :return: MD5 hash over resource's content
-        """
+    md5_hash = hashlib.md5()
 
-        hash_md5 = hashlib.md5()
+    a_file = open(f"{resource_path}/{resource_name}", "rb")
+    content = a_file.read()
+    md5_hash.update(content)
 
-        with open(f"{resource_path}/{resource_name}", "rb") as r:
-            for chunk in iter(lambda: r.read(4096), b""):
-                hash_md5.update(chunk)
-
-        return hash_md5.hexdigest()
+    digest = md5_hash.hexdigest()
+    return digest

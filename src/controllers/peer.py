@@ -13,7 +13,7 @@ import uuid
 from controllers.rest.peer.peer import PeerRESTController
 from threads.peer.download import PeerDownloadThread
 from threads.peer.heartbeat import PeerHeartBeatThread
-from utils.hash import HashUtil
+from utils.hash import generate_hash
 
 __authors__ = ["Gabriel Castro", "Gustavo Possebon", "Henrique Kops"]
 __date__ = "24/10/2020"
@@ -117,7 +117,7 @@ class PeerController:
             resource_file = open(f"{file_path}/{file_name}", "wb")
             resource_file.write(resource_data)
 
-            downloaded_hash = HashUtil.generate_hash(file_path, file_name)
+            downloaded_hash = generate_hash(file_path, file_name)
 
             print(peer_resource_hash)
             print(downloaded_hash)
