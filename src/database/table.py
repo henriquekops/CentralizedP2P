@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+Module that defines the database's schemas
+"""
+
 # external dependencies
 import sqlalchemy
 from sqlalchemy import (
@@ -18,7 +22,7 @@ Base = declarative_base()
 
 class ResourceTable(Base):
     """
-    Database resource table
+    Database 'resources' table definition
     """
 
     __tablename__ = "resources"
@@ -35,7 +39,7 @@ class ResourceTable(Base):
 
 def create_table() -> None:
     """
-    Create all sqlite3 databases registered at 'Base' object through declared 'engine'
+    Create 'resources' table registered at 'Base' object through declared 'engine'
     """
 
     engine = sqlalchemy.create_engine("sqlite:///db.sqlite3")

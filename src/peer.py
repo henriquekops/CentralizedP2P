@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+Module that starts a peer's CLI (peer's main thread)
+"""
+
 # built-in dependencies
 import pprint
 import sys
 
 # project dependencies
-from controllers.peer import PeerController
+from controllers.peer.peer import PeerController
 
 __authors__ = ["Gabriel Castro", "Gustavo Possebon", "Henrique Kops"]
 __date__ = "25/10/2020"
@@ -14,13 +18,13 @@ __date__ = "25/10/2020"
 if __name__ == "__main__":
 
     if len(sys.argv) != 5:
-        print("Usage: python src/peer.py <peer_ip:ipv4> <server_ip:ipv4> <peer_port:int> <thread_port:int>")
+        print("Usage: python src/peer_rest.py <peer_ip:ipv4> <server_ip:ipv4> <peer_port:int> <thread_port:int>")
         sys.exit(2)
 
     peer_ip = sys.argv[1]
     server_ip = sys.argv[2]
-    peer_port = sys.argv[3]
-    thread_port = sys.argv[4]
+    peer_port = int(sys.argv[3])
+    thread_port = int(sys.argv[4])
 
     print("peer running!")
     print("commands:\n\t"
@@ -31,11 +35,14 @@ if __name__ == "__main__":
 
     peer = PeerController(peer_ip, server_ip, peer_port, thread_port)
 
+    # start heartbeat and socket listen threads
     peer.heartbeat_thread.start()
-    peer.download_thread.start()
+    peer.listen_thread.start()
+
     commands = ["-u", "-d", "-l"]
 
     try:
+        # peer's CLI loop
         while True:
             entry = input("> ")
 
@@ -67,8 +74,9 @@ if __name__ == "__main__":
                 pprint.pprint(peer.upload(args[1]))
 
     finally:
+        # stop heartbeat and socket listen threads
         peer.heartbeat_thread.stop()
-        peer.download_thread.stop()
+        peer.listen_thread.stop()
 
         peer.heartbeat_thread.join()
-        peer.download_thread.join()
+        peer.listen_thread.join()

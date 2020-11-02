@@ -1,16 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+Module that defines '/heartbeat' route body's schema
+"""
+
 # external dependencies
-from marshmallow import Schema, fields
+import marshmallow
 
 __authors__ = ["Gabriel Castro", "Gustavo Possebon", "Henrique Kops"]
 __date__ = "29/10/2020"
 
 
-class PostHeartbeatSchema(Schema):
+class PostHeartbeatSchema(marshmallow.Schema):
     """
-    Schema validation for server's 'POST' route (/heartbeat)
+    Schema validation for central server's 'POST' route (/heartbeat)
+
+    Example:
+    {
+        peer_id: <UUID>
+    }
     """
 
-    peer_id = fields.UUID()
+    peer_id = marshmallow.fields.UUID()

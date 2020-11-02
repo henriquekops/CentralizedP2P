@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+Module that defines peer's heart beat thread
+"""
+
 # built-in dependencies
 import json
 import queue
@@ -32,8 +36,7 @@ class PeerHeartBeatThread(BaseThread):
 
     def run(self) -> None:
         """
-        Overrides the default thread's behaviour to
-        consume a heartbeat route at central server
+        Overrides the base thread's behaviour to consume a heartbeat route at central server
         """
 
         body = {
