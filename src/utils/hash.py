@@ -16,9 +16,6 @@ def generate_hash(resource_path: str, resource_name: str) -> str:
     :return: MD5 hash over resource's content
     """
 
-    print(f"Path: {resource_path} | Nome: {resource_name}")
-    print(open(f"{resource_path}/{resource_name}", "r"))
-
     md5_hash = hashlib.md5()
 
     a_file = open(f"{resource_path}/{resource_name}", "rb")

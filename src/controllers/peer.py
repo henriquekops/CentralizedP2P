@@ -116,11 +116,9 @@ class PeerController:
             file_name = f"{peer_ip}_{resource_name}"
             resource_file = open(f"{file_path}/{file_name}", "wb")
             resource_file.write(resource_data)
+            resource_file.close()
 
             downloaded_hash = generate_hash(file_path, file_name)
-
-            print(peer_resource_hash)
-            print(downloaded_hash)
 
             if peer_resource_hash == downloaded_hash:
                 return f"resource '{resource_name}' downloaded at path '{file_path}'!"
