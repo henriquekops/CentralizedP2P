@@ -114,8 +114,12 @@ class PeerController:
                 resource_name=resource_name,
                 resource_hash=self.__generate_hash(resource_path, resource_name),
                 server_ip=self.server_ip
-            )
-            return f"server response: '{response.json()}'"
+            ).json()
+
+            if response.get("success"):
+                return f"resource '{resource_name}' uploaded!"
+            else:
+                return f"could not upload, server said: '{response.get('data')}'!"
 
         except FileNotFoundError:
             return f"resource '{resource}' not found!"
@@ -132,16 +136,20 @@ class PeerController:
         response = self.rest_controller.call_server_get_resource(
             resource_name=resource_name,
             server_ip=self.server_ip
-        )
+        ).json()
 
-        peers = json.loads(response.json())
+        if response.get("success"):
 
-        if peers:
-            peer_ip = peers[0].get("peer_ip")
-            peer_port = peers[0].get("peer_port")
-            peer_resource_path = peers[0].get("resource_path")
-            peer_resource_name = peers[0].get("resource_name")
-            peer_resource_hash = peers[0].get("resource_hash")
+            peer_info = json.loads(response.get("data"))
+
+            if not peer_info:
+                return f"no peers found for resource '{resource_name}'!"
+
+            peer_ip = peer_info[0].get("peer_ip")
+            peer_port = peer_info[0].get("peer_port")
+            peer_resource_path = peer_info[0].get("resource_path")
+            peer_resource_name = peer_info[0].get("resource_name")
+            peer_resource_hash = peer_info[0].get("resource_hash")
 
             file = f"{peer_resource_path}/{peer_resource_name}".encode("utf-8")
 
@@ -155,7 +163,8 @@ class PeerController:
                 resource_data, client = self.socket.recvfrom(1024)
 
             except socket.timeout:
-                return f"it looks like peer '{peer_ip}:{peer_port}' is not responding, interrupting connection!"
+                return f"it looks like peer '{peer_ip}:{peer_port}' is not responding, " \
+                       f"interrupting connection!"
 
             # write received resource's data to 'downloads' directory
             downloaded_file_path = "downloads"
@@ -166,14 +175,19 @@ class PeerController:
             resource_file.close()
 
             # validate downloaded resource
-            downloaded_hash = self.__generate_hash(downloaded_file_path, downloaded_file_name)
+            downloaded_hash = self.__generate_hash(
+                resource_path=downloaded_file_path,
+                resource_name=downloaded_file_name
+            )
 
             if peer_resource_hash == downloaded_hash:
-                return f"resource '{downloaded_file_name}' downloaded at path '{downloaded_file_path}'!"
+                return f"resource '{downloaded_file_name}' downloaded at path " \
+                       f"'{downloaded_file_path}'!"
 
             else:
-                return f"resource '{downloaded_file_name}' downloaded at path '{downloaded_file_path}' but " \
-                   f"hash is incorrect, file might be corrupted!"
+                return f"resource '{downloaded_file_name}' downloaded at path " \
+                       f"'{downloaded_file_path}' but hash is incorrect, file " \
+                       f"might be corrupted!"
 
         else:
-            return f"no peers found for resource '{resource_name}'!"
+            return f"could not download, server said: {response.get('data')}"

@@ -16,6 +16,7 @@ import marshmallow
 
 # project dependencies
 from controllers.database.database import get_database_resource_table_controller
+from controllers.server.utils import response
 from schema.resource import (
     GetResourceSchema,
     PostResourceSchema
@@ -41,7 +42,7 @@ class ResourceController(flask_restful.Resource):
     @classmethod
     def get(cls) -> typing.Tuple:
         """
-        Retrieve every peer's info that contains a certain resource name OR a every peer's info
+        Retrieve peer's info that contains a certain resource name OR a list of every peer's info
         (decision is made with body presence or not, respectively)
 
         :return: Tuple which contains desired peer's info and a relevant HTTP status code
@@ -60,12 +61,12 @@ class ResourceController(flask_restful.Resource):
                 body_data = cls.get_schema.load(body)
 
                 # call database
-                resource_matrix = cls.db_access.get_available_peers(
+                resource_matrix = cls.db_access.get_available_peer(
                     resource_name=str(body_data.get("resource_name"))
                 )
 
             except marshmallow.ValidationError as error:
-                return error.messages, 422
+                return response.unprocessable_entity(data=str(error.messages))
 
         # map returned db matrix into list of dicts as:
         # [{
@@ -75,9 +76,9 @@ class ResourceController(flask_restful.Resource):
         #   "resource_name": "...",
         #   "resource_hash": "..."
         # }]
-        resource_list = list(map(lambda x: {cls.db_get_fields[i]: x[i] for i in range(len(x))}, resource_matrix))
+        resource_list = list(map(lambda x: {cls.db_get_fields[i]: x[i] for i in range(len(x)) if x}, resource_matrix))
 
-        return json.dumps(resource_list), 200
+        return response.ok(data=json.dumps(resource_list))
 
     @classmethod
     def post(cls) -> typing.Tuple:
@@ -90,7 +91,7 @@ class ResourceController(flask_restful.Resource):
         body = flask.request.get_json()
 
         if not body:
-            return "No body", 400
+            return response.bad_request(data="Request needs a body, but none encountered.")
 
         try:
             # request's body validation through marshmallow
@@ -106,7 +107,7 @@ class ResourceController(flask_restful.Resource):
                 resource_hash=str(body_data.get("resource_hash"))
             )
 
-            return json.dumps(body), 200
+            return response.ok(data=json.dumps(body))
 
         except marshmallow.ValidationError as error:
-            return error.messages, 422
+            return response.unprocessable_entity(data=error.messages)

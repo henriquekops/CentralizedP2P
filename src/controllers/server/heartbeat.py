@@ -14,6 +14,7 @@ import flask_restful
 import marshmallow
 
 # project dependencies
+from controllers.server.utils import response
 from schema.heartbeat import PostHeartbeatSchema
 from threads.server.heartbeat import ServerHeartBeatThread
 
@@ -42,7 +43,7 @@ class HeartBeatController(flask_restful.Resource):
         body = flask.request.get_json()
 
         if not body:
-            return "No body", 400
+            return response.bad_request(data="Request needs a body, but none encountered.")
 
         try:
             # request's body validation through marshmallow
@@ -82,10 +83,10 @@ class HeartBeatController(flask_restful.Resource):
                 # tell heartbeat thread that a request has arrived
                 peer_queue.append(1)
 
-            return "OK", 200
+            return response.ok(data="Ok")
 
         except marshmallow.ValidationError as error:
-            return error.messages, 422
+            return response.unprocessable_entity(data=str(error.messages))
 
     @classmethod
     def stop_threads(cls) -> None:

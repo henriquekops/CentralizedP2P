@@ -56,7 +56,7 @@ class PeerRESTController:
     @staticmethod
     def call_server_get_resource(resource_name: str, server_ip: str) -> requests.Response:
         """
-        Call central server to search peer ips that contains a resource through its name
+        Call central server to search peer's info that contains a resource through its name
 
         :param resource_name: Resource provided by the caller peer
         :param server_ip: Central server's IPV4

@@ -61,19 +61,19 @@ class _DatabaseResourceTableController:
         finally:
             session.close()
 
-    def get_available_peers(self, resource_name: str) -> typing.List:
+    def get_available_peer(self, resource_name: str) -> typing.List:
         """
-        Get every register of peer's ip and port and resource's path, name and hash
+        Get peer's ip and port and resource's path, name and hash
         that contains same resource name
 
         :param resource_name: Name of the resource to be searched at database
-        :return: List of every matching 'peer x resource' info
+        :return: List containing matching peer's and resource's info
         """
 
         session = self.session()
 
         try:
-            return session\
+            available_peers = session\
                 .query(
                     ResourceTable.peerIp,
                     ResourceTable.peerPort,
@@ -84,6 +84,12 @@ class _DatabaseResourceTableController:
                 .filter(ResourceTable.resourceName == resource_name)\
                 .group_by(ResourceTable.peerId)\
                 .all()
+
+            if available_peers:
+                return [list(available_peers[0])]
+
+            else:
+                return []
 
         finally:
             session.close()

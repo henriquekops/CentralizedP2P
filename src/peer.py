@@ -46,6 +46,10 @@ if __name__ == "__main__":
         while True:
             entry = input("> ")
 
+            if entry == "-q":
+                print("bye...")
+                break
+
             if not peer.thread_exceptions.empty():
                 exception = peer.thread_exceptions.get_nowait()
                 print(f'error: {exception}')
@@ -56,22 +60,18 @@ if __name__ == "__main__":
             if len(args) == 0:
                 print("input [-q, -l, -d <resource_name>, -u <resource_name>]")
 
-            elif args[0] == "-q":
-                print("bye...")
-                break
-
             elif args[0] not in commands or len(args) > 2 or len(args) == 0:
                 print("input [-q, -l, -d <resource_name>, -u <resource_name>]")
 
             elif args[0] == "-l":
                 result = peer.list()
-                pprint.pprint(result)
+                pprint.pprint(result, indent=4)
 
             elif args[0] == "-d":
-                pprint.pprint(peer.download(args[1]))
+                print(peer.download(args[1]))
 
             elif args[0] == "-u":
-                pprint.pprint(peer.upload(args[1]))
+                print(peer.upload(args[1]))
 
     finally:
         # stop heartbeat and socket listen threads
