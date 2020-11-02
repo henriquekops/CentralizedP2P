@@ -35,8 +35,8 @@ class ResourceController(flask_restful.Resource):
     def get(cls) -> typing.Tuple:
 
         """
-        Retrieve every peer's info
-        :return: List of all peer's info
+        Retrieve every peer's info OR every peer's info that contains a certain resource
+        :return: List of all peer's info OR every peer's info that contains a certain resource
         """
 
         body = flask.request.get_json()

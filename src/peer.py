@@ -33,12 +33,7 @@ if __name__ == "__main__":
 
     peer.heartbeat_thread.start()
     peer.download_thread.start()
-
-    commands = {
-        "-u": peer.upload,
-        "-d": peer.download,
-        "-l": peer.list
-    }
+    commands = ["-u", "-d", "-l"]
 
     try:
         while True:
@@ -58,7 +53,7 @@ if __name__ == "__main__":
                 print("bye...")
                 break
 
-            elif args[0] not in commands.keys() or len(args) > 2 or len(args) == 0:
+            elif args[0] not in commands or len(args) > 2 or len(args) == 0:
                 print("input [-q, -l, -d <resource_name>, -u <resource_name>]")
 
             elif args[0] == "-l":

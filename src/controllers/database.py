@@ -86,7 +86,6 @@ class _DatabaseResourceTableController:
         """
         Get every peer's info and port that has registered same resource name
 
-        :param resource_name: Name of the resource to be searched at database
         :return: List of every peer's info
         """
 

@@ -87,11 +87,10 @@ class PeerRESTController:
             headers=header
         )
 
-
     @staticmethod
     def call_server_get_all_resources(server_ip: str) -> requests.Response:
         """
-        Call server to search peer ips that contains this resource
+        Call server to search for every available peer and it's resource
 
         :param server_ip: Central server's ipv4
         :return: Central server's response
