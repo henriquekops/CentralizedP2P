@@ -112,7 +112,7 @@ class _DatabaseResourceTableController:
                     ResourceTable.resourceName,
                     ResourceTable.resourceHash
                 )\
-                .group_by(ResourceTable.peerId)\
+                .group_by(ResourceTable.peerId, ResourceTable.resourceHash)\
                 .all()
 
             return available_peers
