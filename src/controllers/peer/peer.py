@@ -62,23 +62,6 @@ class PeerController:
                 if exc.errno != errno.EEXIST:
                     raise
 
-    @staticmethod
-    def __generate_hash(resource_path: str, resource_name: str) -> str:
-        """
-        Generates a MD5 hash over a resource's content
-        :param resource_path: Resource's path
-        :param resource_name: Resource's name
-        :return: MD5 hash over resource's content
-        """
-
-        md5_hash = hashlib.md5()
-
-        resource = open(f"{resource_path}/{resource_name}", "rb")
-        content = resource.read()
-        md5_hash.update(content)
-
-        return md5_hash.hexdigest()
-
     def list(self) -> str:
         """
         Lists all available resources at central server
@@ -91,7 +74,7 @@ class PeerController:
             server_ip=self.server_ip
         )
 
-        return json.loads(response.json())
+        return response.json().get("data")
 
     def upload(self, resource: str) -> str:
         """
@@ -145,49 +128,109 @@ class PeerController:
             if not peer_info:
                 return f"no peers found for resource '{resource_name}'!"
 
-            peer_ip = peer_info[0].get("peer_ip")
-            peer_port = peer_info[0].get("peer_port")
-            peer_resource_path = peer_info[0].get("resource_path")
-            peer_resource_name = peer_info[0].get("resource_name")
-            peer_resource_hash = peer_info[0].get("resource_hash")
+            peer_ip = peer_info.get("peer_ip")
+            peer_port = peer_info.get("peer_port")
+            peer_resource_path = peer_info.get("resource_path")
+            peer_resource_name = peer_info.get("resource_name")
+            peer_resource_hash = peer_info.get("resource_hash")
 
-            file = f"{peer_resource_path}/{peer_resource_name}".encode("utf-8")
+            resource = f"{peer_resource_path}/{peer_resource_name}"
 
-            try:
-                # ask found resource to it's related peer
-                self.socket.settimeout(10)
-                self.socket.sendto(
-                    file,  # data
-                    (peer_ip, peer_port)  # address
-                )
-                resource_data, client = self.socket.recvfrom(1024)
-
-            except socket.timeout:
-                return f"it looks like peer '{peer_ip}:{peer_port}' is not responding, " \
-                       f"interrupting connection!"
-
-            # write received resource's data to 'downloads' directory
-            downloaded_file_path = "downloads"
-            downloaded_file_name = f"{peer_ip}_{resource_name}"
-
-            resource_file = open(f"{downloaded_file_path}/{downloaded_file_name}", "wb")
-            resource_file.write(resource_data)
-            resource_file.close()
-
-            # validate downloaded resource
-            downloaded_hash = self.__generate_hash(
-                resource_path=downloaded_file_path,
-                resource_name=downloaded_file_name
+            resource_data = self.__socket_download(
+                resource=resource,
+                peer_ip=peer_ip,
+                peer_port=peer_port
             )
 
-            if peer_resource_hash == downloaded_hash:
-                return f"resource '{downloaded_file_name}' downloaded at path " \
-                       f"'{downloaded_file_path}'!"
+            if not resource_data:
+                return f"it looks like peer '{peer_ip}:{peer_port}' is not responding, " \
+                        f"interrupting connection!"
 
             else:
-                return f"resource '{downloaded_file_name}' downloaded at path " \
-                       f"'{downloaded_file_path}' but hash is incorrect, file " \
-                       f"might be corrupted!"
+
+                download_file_path = "downloads"
+                download_file_name = f"{peer_ip}_{resource_name}"
+
+                not_corrupted = self.__write_data_to_file(
+                    download_file_path=download_file_path,
+                    download_file_name=download_file_name,
+                    resource_data=resource_data,
+                    original_hash=peer_resource_hash
+                )
+
+                if not_corrupted:
+                    return f"resource '{download_file_name}' downloaded at path " \
+                           f"'{download_file_path}/'!"
+
+                else:
+                    return f"resource '{download_file_name}' downloaded at path " \
+                           f"'{download_file_path}/' but hash is incorrect, file " \
+                           f"might be corrupted!"
 
         else:
             return f"could not download, server said: {response.get('data')}"
+
+    @staticmethod
+    def __generate_hash(resource_path: str, resource_name: str) -> str:
+        """
+        Generates a MD5 hash over a resource's content
+        :param resource_path: Resource's path
+        :param resource_name: Resource's name
+        :return: MD5 hash over resource's content
+        """
+
+        md5_hash = hashlib.md5()
+
+        resource = open(f"{resource_path}/{resource_name}", "rb")
+        content = resource.read()
+        md5_hash.update(content)
+
+        return md5_hash.hexdigest()
+
+    def __socket_download(self, resource: str, peer_ip: str, peer_port: int) -> any:
+        """
+        Downloads a resource's data through UDP socket
+
+        :param resource: Resource identification at target peer's listen port
+        :param peer_ip: Target peer's IPV4
+        :param peer_port: Target peer's listen port
+        :return Downloaded resource's data
+        """
+
+        try:
+            # ask found resource to it's related peer
+            self.socket.settimeout(10)
+            self.socket.sendto(
+                resource.encode("utf-8"),   # data
+                (peer_ip, peer_port)        # address
+            )
+            resource_data, _ = self.socket.recvfrom(1024)
+            return resource_data
+
+        except socket.timeout:
+            return None
+
+    def __write_data_to_file(self, download_file_path: str, download_file_name: str,
+                             resource_data: any, original_hash: str) -> bool:
+        """
+        Writes downloaded docket data to file at desired path
+
+        :param download_file_path: Resource path to write downloaded data
+        :param download_file_name: Resource name to write downloaded data
+        :param resource_data: Resource's data downloaded through UDP socket
+        :param original_hash: Original stored resource's data hash at central server
+        :return Boolean indicating if data is corrupted or not
+        """
+
+        # write received resource's data to 'downloads' directory
+        resource_file = open(f"{download_file_path}/{download_file_name}", "wb")
+        resource_file.write(resource_data)
+        resource_file.close()
+
+        # validate downloaded resource
+        downloaded_hash = self.__generate_hash(
+            resource_path=download_file_path,
+            resource_name=download_file_name
+        )
+
+        return original_hash == downloaded_hash

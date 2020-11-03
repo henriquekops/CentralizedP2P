@@ -86,7 +86,7 @@ class _DatabaseResourceTableController:
                 .all()
 
             if available_peers:
-                return [list(available_peers[0])]
+                return available_peers[0]
 
             else:
                 return []
@@ -104,7 +104,7 @@ class _DatabaseResourceTableController:
         session = self.session()
 
         try:
-            return session\
+            available_peers = session\
                 .query(
                     ResourceTable.peerIp,
                     ResourceTable.peerPort,
@@ -114,6 +114,8 @@ class _DatabaseResourceTableController:
                 )\
                 .group_by(ResourceTable.peerId)\
                 .all()
+
+            return available_peers
 
         finally:
             session.close()

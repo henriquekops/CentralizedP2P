@@ -37,7 +37,7 @@ class ResourceController(flask_restful.Resource):
     db_access = get_database_resource_table_controller()
 
     # fields to map database's response
-    db_get_fields = ["peer_ip", "peer_port", "resource_path", "resource_name", "resource_hash"]
+    db_fields = ["peer_ip", "peer_port", "resource_path", "resource_name", "resource_hash"]
 
     @classmethod
     def get(cls) -> typing.Tuple:
@@ -52,7 +52,16 @@ class ResourceController(flask_restful.Resource):
 
         # if request was called with no body, list all resources
         if not body:
+            # call database
             resource_matrix = cls.db_access.get_all_resources()
+
+            # transform matrix of values from database to list of dicts
+            resource_list = list(map(
+                lambda x: {cls.db_fields[i]: x[i] for i in range(len(x))},
+                resource_matrix
+            ))
+
+            return response.ok(data=json.dumps(resource_list))
 
         # else filter through resource's name
         else:
@@ -61,24 +70,19 @@ class ResourceController(flask_restful.Resource):
                 body_data = cls.get_schema.load(body)
 
                 # call database
-                resource_matrix = cls.db_access.get_available_peer(
+                resource_list = cls.db_access.get_available_peer(
                     resource_name=str(body_data.get("resource_name"))
                 )
 
+                # transform list of values from database to dict
+                resource_dict = {
+                    cls.db_fields[i]: resource_list[i] for i in range(len(resource_list))
+                }
+
+                return response.ok(data=json.dumps(resource_dict))
+
             except marshmallow.ValidationError as error:
                 return response.unprocessable_entity(data=str(error.messages))
-
-        # map returned db matrix into list of dicts as:
-        # [{
-        #   "peer_ip": "...",
-        #   "peer_port": "...",
-        #   "resource_path": "...",
-        #   "resource_name": "...",
-        #   "resource_hash": "..."
-        # }]
-        resource_list = list(map(lambda x: {cls.db_get_fields[i]: x[i] for i in range(len(x)) if x}, resource_matrix))
-
-        return response.ok(data=json.dumps(resource_list))
 
     @classmethod
     def post(cls) -> typing.Tuple:
