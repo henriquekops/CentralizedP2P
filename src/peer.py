@@ -18,13 +18,13 @@ __date__ = "25/10/2020"
 if __name__ == "__main__":
 
     if len(sys.argv) != 5:
-        print("Usage: python src/peer_rest.py <peer_ip:ipv4> <server_ip:ipv4> <peer_port:int> <thread_port:int>")
+        print("Usage: python src/peer_rest.py <peer_ip:ipv4> <server_ip:ipv4> <action_port:int> <listen_port:int>")
         sys.exit(2)
 
     peer_ip = sys.argv[1]
     server_ip = sys.argv[2]
-    peer_port = int(sys.argv[3])
-    thread_port = int(sys.argv[4])
+    action_port = int(sys.argv[3])
+    listen_port = int(sys.argv[4])
 
     print("peer running!")
     print("commands:\n\t"
@@ -33,7 +33,12 @@ if __name__ == "__main__":
           "-l = list all resources \n\t"
           "-q = quit")
 
-    peer = PeerController(peer_ip, server_ip, peer_port, thread_port)
+    peer = PeerController(
+        peer_ip=peer_ip,
+        server_ip=server_ip,
+        action_port=action_port,
+        listen_port=listen_port
+    )
 
     # start heartbeat and socket listen threads
     peer.heartbeat_thread.start()

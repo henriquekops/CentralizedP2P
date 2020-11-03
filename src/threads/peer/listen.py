@@ -22,17 +22,17 @@ class PeerListenSocketThread(BaseThread):
     Peer's listen thread for socket communications
     """
 
-    def __init__(self, peer_ip: str, peer_port: int, exceptions: queue.Queue, *args, **kwargs):
+    def __init__(self, peer_ip: str, listen_port: int, exceptions: queue.Queue, *args, **kwargs):
         super(PeerListenSocketThread, self).__init__(*args, **kwargs)
 
         # arguments
         self.peer_ip = peer_ip
-        self.peer_port = peer_port
+        self.listen_port = listen_port
         self.exceptions = exceptions
 
         # sockets
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.bind((self.peer_ip, int(self.peer_port)))
+        self.socket.bind((self.peer_ip, int(self.listen_port)))
 
     def run(self) -> None:
         """

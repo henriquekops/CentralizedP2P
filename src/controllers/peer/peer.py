@@ -25,23 +25,31 @@ __date__ = "24/10/2020"
 
 class PeerController:
 
-    def __init__(self, peer_ip: str, server_ip: str, peer_port: int, thread_port: int):
+    def __init__(self, peer_ip: str, server_ip: str, action_port: int, listen_port: int):
         # arguments
         self.peer_ip = peer_ip
-        self.peer_port = peer_port
+        self.action_port = action_port
         self.server_ip = server_ip
-        self.thread_port = thread_port
+        self.listen_port = listen_port
 
         self.peer_id = str(uuid.uuid4())
 
         # socket
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.bind((self.peer_ip, self.peer_port))
+        self.socket.bind((self.peer_ip, self.action_port))
 
         # threads (will be started at peer's main thread at project's root)
         self.thread_exceptions = queue.Queue()
-        self.listen_thread = PeerListenSocketThread(self.peer_ip, self.thread_port, self.thread_exceptions)
-        self.heartbeat_thread = PeerHeartBeatThread(self.peer_id, self.server_ip, self.thread_exceptions)
+        self.listen_thread = PeerListenSocketThread(
+            peer_ip=self.peer_ip,
+            listen_port=self.listen_port,
+            exceptions=self.thread_exceptions
+        )
+        self.heartbeat_thread = PeerHeartBeatThread(
+            peer_id=self.peer_id,
+            server_ip=self.server_ip,
+            exceptions=self.thread_exceptions
+        )
 
         # rest
         self.rest_controller = PeerRESTController()
@@ -92,7 +100,7 @@ class PeerController:
             response = self.rest_controller.call_server_post_resource(
                 peer_id=self.peer_id,
                 peer_ip=self.peer_ip,
-                thread_port=self.thread_port,
+                thread_port=self.listen_port,
                 resource_path=resource_path,
                 resource_name=resource_name,
                 resource_hash=self.__generate_hash(resource_path, resource_name),

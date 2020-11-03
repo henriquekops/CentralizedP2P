@@ -63,7 +63,10 @@ class HeartBeatController(flask_restful.Resource):
                 })
 
                 # start heartbeat thread for caller peer's ip
-                server_heart_beat_thread = ServerHeartBeatThread(peer_id, new_queue)
+                server_heart_beat_thread = ServerHeartBeatThread(
+                    peer_id=peer_id,
+                    my_queue=new_queue
+                )
                 cls.threads.append(server_heart_beat_thread)
                 server_heart_beat_thread.start()
 
@@ -76,7 +79,10 @@ class HeartBeatController(flask_restful.Resource):
                 # this code is reachable when peer restarts communications
                 # it starts a new thread for old disconnected peer
                 if 0 in peer_queue:
-                    server_heart_beat_thread = ServerHeartBeatThread(peer_id, peer_queue)
+                    server_heart_beat_thread = ServerHeartBeatThread(
+                        peer_id=peer_id,
+                        my_queue=peer_queue
+                    )
                     cls.threads.append(server_heart_beat_thread)
                     server_heart_beat_thread.start()
 
