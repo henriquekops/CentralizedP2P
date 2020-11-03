@@ -45,10 +45,10 @@ class PeerListenSocketThread(BaseThread):
                 try:
                     # wait for connection with timeout (check for thread interruption)
                     self.socket.settimeout(1)
-                    msg, client = self.socket.recvfrom(1024)
+                    msg, client = self.socket.recvfrom(10240)
 
                     # open resource through received message
-                    resource = open(msg, "rb").read(1024)
+                    resource = open(msg, "rb").read(10240)
 
                     # send back to the caller
                     self.socket.sendto(resource, client)

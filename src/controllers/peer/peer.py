@@ -212,7 +212,7 @@ class PeerController:
                 resource.encode("utf-8"),   # data
                 (peer_ip, peer_port)        # address
             )
-            resource_data, _ = self.socket.recvfrom(1024)
+            resource_data, _ = self.socket.recvfrom(10240)
             return resource_data
 
         except socket.timeout:
