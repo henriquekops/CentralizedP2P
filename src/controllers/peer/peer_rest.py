@@ -21,14 +21,14 @@ class PeerRESTController:
     """
 
     @staticmethod
-    def call_server_post_resource(peer_id: str, peer_ip: str, thread_port: int, resource_path: str,
+    def call_server_post_resource(peer_id: str, peer_ip: str, listen_port: int, resource_path: str,
                                   resource_name: str, resource_hash: str,  server_ip: str) -> requests.Response:
         """
         Call central server to register a resource and assign to the caller peer
 
         :param peer_id: Peer's UUID
         :param peer_ip: Peer's IPV4
-        :param thread_port: Peer's listen port
+        :param listen_port: Peer's listen port
         :param resource_path: Resource's path provided by the caller peer
         :param resource_name: Resource's name provided by the caller peer
         :param resource_hash: Resource's hash provided by the caller peer
@@ -39,7 +39,7 @@ class PeerRESTController:
         body = {
             "peer_id": peer_id,
             "peer_ip": peer_ip,
-            "peer_port": thread_port,
+            "peer_port": listen_port,
             "resource_path": resource_path,
             "resource_name": resource_name,
             "resource_hash": resource_hash,

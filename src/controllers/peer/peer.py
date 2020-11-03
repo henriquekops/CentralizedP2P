@@ -100,7 +100,7 @@ class PeerController:
             response = self.rest_controller.call_server_post_resource(
                 peer_id=self.peer_id,
                 peer_ip=self.peer_ip,
-                thread_port=self.listen_port,
+                listen_port=self.listen_port,
                 resource_path=resource_path,
                 resource_name=resource_name,
                 resource_hash=self.__generate_hash(resource_path, resource_name),

@@ -1,10 +1,14 @@
 # CentralizedP2P
 > Python version: 3.8.6
 
-A simple program to run a centralized peer to peer architecture using 
-sockets and REST.
+A simple program to run a centralized peer-to-peer architecture using 
+sockets and HTTP REST.
 
 ## Dependencies
+
+It is recommended to use [pyenv](https://github.com/pyenv/pyenv) for 
+managing your python versions.
+
 To install all dependencies related to this project, it is recommended 
 to create a _virtual environment_ and use the _requirements.txt_ file
 present at this repo. To achieve such goal, run:
@@ -12,8 +16,11 @@ present at this repo. To achieve such goal, run:
 ```
 # at CentralizedP2P/
 
+# virtual environment
 $ python -m venv venv
 $ . venv/bin/activate
+
+# install
 $ pip install -r requirements.txt
 ```
 
@@ -32,31 +39,54 @@ between each other. To achieve this, run:
 ```
 # at CentralizedP2P/
 
-$ python src/peer.py
+$ python src/server.py <peer_ip:ipv4> <server_ip:ipv4> <action_port:int> <listen_port:int>
 ```
+
+> Field 'action_port' refers to the port that is used by peer's CLI 
+(main thread).
+
+> Field 'listen_port' refers to the port that listens to socket requests 
+(runs in a separated thread).
 
 ## REST routing
 
 To communicate with the centralized server all peers utilize REST calls 
-with the same format shown below: 
+with the same format, shown below: 
 
-#### Route: <base_url>/resource
-GET: Retrieve peer ips that contains such resource
+#### /resource
+GET: Retrieve every peer's info registered at database.
+
 ```
+# request body
+{}
+``` 
+
+GET: Retrieve peer's info that contains such resource.
+```
+# request body
 {
     "resource_name": "test.csv"
 }
 ```
 
-POST: Assign a new resource to a peer
+POST: Assign a new resource to a peer.
 ```
+# request body
 {
 	"peer_id": "42bb7fb8-8f8d-4c1c-b4df-d97c2e78eb7c",
 	"peer_ip": "127.0.0.1",
 	"peer_port": 3000,
-	"resource_name": "test.txt",
-	"resource_path": "./tests/",
-	"resource_hash": "12345"
+	"resource_name": "test.csv",
+	"resource_path": "./tests",
+	"resource_hash": "dea311be2ca928ae1d6ba5ab28b53c60"
+}
+```
+
+#### /heartbeat
+POST: Tell server that peer still alive.
+```
+{
+    "peer_id": "42bb7fb8-8f8d-4c1c-b4df-d97c2e78eb7c"
 }
 ```
 
