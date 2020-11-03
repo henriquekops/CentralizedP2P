@@ -57,10 +57,7 @@ if __name__ == "__main__":
 
             args = entry.split()
 
-            if len(args) == 0:
-                print("input [-q, -l, -d <resource_name>, -u <resource_name>]")
-
-            elif args[0] not in commands or len(args) > 2 or len(args) == 0:
+            if args[0] not in commands or len(args) > 2 or len(args) == 0:
                 print("input [-q, -l, -d <resource_name>, -u <resource_name>]")
 
             elif args[0] == "-l":
